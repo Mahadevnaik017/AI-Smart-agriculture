@@ -1,3 +1,8 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Lead Developer: Mahadev Naik (Project Lead; AI/ML & System Methodology)
+# Milestone: Agriculture Problem Identification & AI Diagnostic Requirements (20 July 2026)
+# ========================================================================================
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
