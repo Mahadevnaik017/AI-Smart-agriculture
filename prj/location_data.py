@@ -1,3 +1,10 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Module: Hierarchical Agricultural Location Baseline & Crop Mapping (location_data.py)
+# Assigned Specialist: Panchakshari Jogi
+# Responsibility: Crop Recommendation, Testing, Validation & Documentation
+# Milestone: Agriculture problem identification and advisory requirements (20 July 2026)
+# ========================================================================================
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
