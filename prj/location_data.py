@@ -5,6 +5,8 @@
 # Responsibility: Crop Recommendation, Testing, Validation & Documentation
 # Milestone: Agriculture problem identification and advisory requirements (20 July 2026)
 # ========================================================================================
+# Crop Recommendation & Validation Perspective:
+# Focuses on empirical agronomic suitability, validation standards, and user guidance.
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
