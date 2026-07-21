@@ -5,6 +5,8 @@
 # Responsibility: Backend, MySQL Database, Weather API & System Integration
 # Milestone: Backend architecture and API integration planning (20 July 2026)
 # ========================================================================================
+# Backend Technical Requirements:
+# Supports authentication, crop advisory, mandi data, and external weather services.
 import os
 from flask import Flask, render_template, request, session
 from flask_login import LoginManager, current_user
