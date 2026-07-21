@@ -3,6 +3,8 @@
 # Lead Developer: Mahadev Naik (Project Lead; AI/ML & System Methodology)
 # Milestone: Agriculture Problem Identification & AI Diagnostic Requirements (20 July 2026)
 # ========================================================================================
+# Project Scope & Objectives:
+# System provides automated plant leaf pathology diagnosis and actionable advisory.
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
