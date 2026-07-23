@@ -5,6 +5,8 @@
 # ========================================================================================
 # Project Scope & Objectives:
 # System provides automated plant leaf pathology diagnosis and actionable advisory.
+# Core AI Workflow Architecture:
+# Leaf Photo Upload -> Preprocessing (224x224) -> Transfer Learning CNN -> Pathology Classification -> Farm Advisory
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
