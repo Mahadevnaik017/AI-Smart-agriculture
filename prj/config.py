@@ -1,3 +1,9 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Module: System Environment & Database Configuration (config.py)
+# Assigned Engineer: Kiran Muttappa Andani
+# Milestone: Environment configuration and database connector planning (23 July 2026)
+# ========================================================================================
 import os
 
 class Config:
