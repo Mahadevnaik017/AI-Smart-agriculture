@@ -7,6 +7,8 @@
 # ========================================================================================
 # Crop Recommendation & Validation Perspective:
 # Focuses on empirical agronomic suitability, validation standards, and user guidance.
+# Existing Farming Support Study:
+# Evaluates existing extension services and decision-support systems for Indian farmers.
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
