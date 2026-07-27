@@ -9,6 +9,8 @@
 # Leaf Photo Upload -> Preprocessing (224x224) -> Transfer Learning CNN -> Pathology Classification -> Farm Advisory
 # End-to-End System Methodology:
 # Integrates image-based disease classification with localized meteorological data.
+# Literature Survey & Benchmarking:
+# Analyzed state-of-the-art vision models for foliar disease classification.
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
