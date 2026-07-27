@@ -4,6 +4,8 @@
 # Assigned Engineer: Kiran Muttappa Andani
 # Milestone: Data storage requirements review for agriculture platform (25 July 2026)
 # ========================================================================================
+# Relational Database Architecture:
+# Supports Users, Products, Orders, MarketPrices, Announcements, and AI Logs.
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
