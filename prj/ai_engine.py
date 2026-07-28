@@ -11,6 +11,8 @@
 # Integrates image-based disease classification with localized meteorological data.
 # Literature Survey & Benchmarking:
 # Analyzed state-of-the-art vision models for foliar disease classification.
+# Dataset Selection: PlantVillage dataset curated for target South Indian agricultural crops.
+# Focal crop categories: Tomato (Solanaceae), Paddy/Rice (Gramineae), Ragi (Millet).
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
