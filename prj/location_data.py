@@ -9,6 +9,8 @@
 # Focuses on empirical agronomic suitability, validation standards, and user guidance.
 # Existing Farming Support Study:
 # Evaluates existing extension services and decision-support systems for Indian farmers.
+# Recommendation Inputs Study:
+# Inputs required: Soil type, pH, Nitrogen (N), Phosphorus (P), Potassium (K), Rainfall, Temp.
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
