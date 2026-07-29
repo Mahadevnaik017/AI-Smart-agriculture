@@ -13,6 +13,8 @@
 # Analyzed state-of-the-art vision models for foliar disease classification.
 # Dataset Selection: PlantVillage dataset curated for target South Indian agricultural crops.
 # Focal crop categories: Tomato (Solanaceae), Paddy/Rice (Gramineae), Ragi (Millet).
+# Transfer Learning Methodology:
+# Evaluated MobileNetV2 (edge deployable) and ResNet50 for deep feature extraction.
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
