@@ -4,6 +4,8 @@
 # Assigned Engineer: Kiran Muttappa Andani
 # Milestone: Environment configuration and database connector planning (23 July 2026)
 # ========================================================================================
+# Technology Stack:
+# Python Flask micro-framework + SQLAlchemy ORM + MySQL/SQLite database engine.
 import os
 
 class Config:
