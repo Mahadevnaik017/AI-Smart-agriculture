@@ -15,6 +15,8 @@
 # Focal crop categories: Tomato (Solanaceae), Paddy/Rice (Gramineae), Ragi (Millet).
 # Transfer Learning Methodology:
 # Evaluated MobileNetV2 (edge deployable) and ResNet50 for deep feature extraction.
+# AI Model Selection Consolidation:
+# Selected MobileNetV2 backbone for high inference throughput and low server latency.
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
