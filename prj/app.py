@@ -7,6 +7,8 @@
 # ========================================================================================
 # Backend Technical Requirements:
 # Supports authentication, crop advisory, mandi data, and external weather services.
+# Module Coordination:
+# Central blueprint registration coordinating routes: auth, main, dashboard, api.
 import os
 from flask import Flask, render_template, request, session
 from flask_login import LoginManager, current_user
