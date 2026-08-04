@@ -8,6 +8,8 @@
 # Supports Users, Products, Orders, MarketPrices, Announcements, and AI Logs.
 # Entity Categorization:
 # Core tables: users, categories, products, orders, order_items, market_prices, forum_posts.
+# Data Flow Coordination:
+# Structured flow between user session, catalog queries, and transactional orders.
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
