@@ -17,6 +17,9 @@
 # Evaluated MobileNetV2 (edge deployable) and ResNet50 for deep feature extraction.
 # AI Model Selection Consolidation:
 # Selected MobileNetV2 backbone for high inference throughput and low server latency.
+# Image Preprocessing Pipeline:
+# Input Dimensions: 224x224x3 RGB tensors.
+# Channel normalization: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225].
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
