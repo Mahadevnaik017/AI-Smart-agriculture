@@ -10,6 +10,8 @@
 # Core tables: users, categories, products, orders, order_items, market_prices, forum_posts.
 # Data Flow Coordination:
 # Structured flow between user session, catalog queries, and transactional orders.
+# Database Schema Review:
+# Ensures compatibility for weather caches and disease diagnosis logs.
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
