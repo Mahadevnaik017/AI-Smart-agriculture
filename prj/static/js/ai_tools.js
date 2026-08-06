@@ -1,3 +1,11 @@
+/**
+ * ========================================================================================
+ * AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+ * Script: AI Advisory Tools Client-Side Validation & Interactivity (static/js/ai_tools.js)
+ * Assigned Specialist: Panchakshari Jogi
+ * Milestone: Recommendation interface input flow and client validation (6 August 2026)
+ * ========================================================================================
+ */
 // AI Tools Interactive Handlers
 document.addEventListener('DOMContentLoaded', () => {
   // Image Upload Live Preview for Disease Detection
