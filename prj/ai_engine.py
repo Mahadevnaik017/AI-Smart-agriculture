@@ -20,6 +20,8 @@
 # Image Preprocessing Pipeline:
 # Input Dimensions: 224x224x3 RGB tensors.
 # Channel normalization: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225].
+# AI Pipeline Continuation:
+# Connecting preprocessing transforms with transfer learning model inputs.
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
