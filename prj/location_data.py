@@ -11,6 +11,8 @@
 # Evaluates existing extension services and decision-support systems for Indian farmers.
 # Recommendation Inputs Study:
 # Inputs required: Soil type, pH, Nitrogen (N), Phosphorus (P), Potassium (K), Rainfall, Temp.
+# Recommendation Data Fields:
+# Establishes schema for soil profiles, rainfall baselines, and temperature thresholds.
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
