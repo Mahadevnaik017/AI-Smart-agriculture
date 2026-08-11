@@ -22,6 +22,8 @@
 # Channel normalization: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225].
 # AI Pipeline Continuation:
 # Connecting preprocessing transforms with transfer learning model inputs.
+# Database Entity Integration:
+# Inference outputs map to DiseaseDetectionLog table (crop_name, detected_disease, confidence).
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
