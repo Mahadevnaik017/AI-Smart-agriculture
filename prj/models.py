@@ -12,6 +12,9 @@
 # Structured flow between user session, catalog queries, and transactional orders.
 # Database Schema Review:
 # Ensures compatibility for weather caches and disease diagnosis logs.
+# Relational Database Schema Design:
+# User identity model with role-based access control (farmer, buyer, officer, admin).
+# Password encryption using Werkzeug security (pbkdf2:sha256).
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
