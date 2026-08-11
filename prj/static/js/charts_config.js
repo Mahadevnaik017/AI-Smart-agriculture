@@ -1,3 +1,11 @@
+/**
+ * ========================================================================================
+ * AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+ * Script: Interactive Chart.js Visualizations (static/js/charts_config.js)
+ * Assigned Specialist: Mallikarjun Vaddarganvi
+ * Milestone: Frontend data requirements for visual components (11 August 2026)
+ * ========================================================================================
+ */
 // Chart.js Configuration for Mojara Dashboards & Main Homepage Trading Graphs
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Homepage Mandi Price Trend Line Chart
