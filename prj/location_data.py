@@ -13,6 +13,8 @@
 # Inputs required: Soil type, pH, Nitrogen (N), Phosphorus (P), Potassium (K), Rainfall, Temp.
 # Recommendation Data Fields:
 # Establishes schema for soil profiles, rainfall baselines, and temperature thresholds.
+# Data Validation & Consistency:
+# Verifies consistency between agro-climatic zones and expected crop maturity cycles.
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
