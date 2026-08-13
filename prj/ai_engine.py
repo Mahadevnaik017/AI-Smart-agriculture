@@ -24,6 +24,8 @@
 # Connecting preprocessing transforms with transfer learning model inputs.
 # Database Entity Integration:
 # Inference outputs map to DiseaseDetectionLog table (crop_name, detected_disease, confidence).
+# AI Data Validation:
+# Validates confidence score ranges (0.0 to 1.0) and disease classification codes.
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
