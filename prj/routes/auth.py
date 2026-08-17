@@ -1,3 +1,9 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Module: User Authentication & Profile Routing Controller (routes/auth.py)
+# Assigned Engineer: Kiran Muttappa Andani
+# Milestone: User registration backend and password hashing with PBKDF2 (17 August 2026)
+# ========================================================================================
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User
