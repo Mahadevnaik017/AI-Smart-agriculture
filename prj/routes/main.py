@@ -204,6 +204,13 @@ def ai_fertilizer():
 
 @main_bp.route('/ai/disease-detection', methods=['GET', 'POST'])
 def ai_disease():
+    """
+    AI Plant Disease Diagnostic View Controller
+    Assigned Lead: Mahadev Naik (Project Lead; AI/ML & Disease Detection)
+    Milestone: AI Disease Detection Backend Integration Planning (18 August 2026)
+
+    Receives crop leaf image uploads and dispatches inputs to the AI inference engine.
+    """
     diagnosis = None
     if request.method == 'POST':
         crop_name = request.form.get('crop_name', 'Tomato')
