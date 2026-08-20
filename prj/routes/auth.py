@@ -4,6 +4,8 @@
 # Assigned Engineer: Kiran Muttappa Andani
 # Milestone: User registration backend and password hashing with PBKDF2 (17 August 2026)
 # ========================================================================================
+# Session Management & Role Redirection:
+# Handles authenticated sessions via Flask-Login and routes users to role-specific dashboards.
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User
