@@ -15,6 +15,10 @@
 # Establishes schema for soil profiles, rainfall baselines, and temperature thresholds.
 # Data Validation & Consistency:
 # Verifies consistency between agro-climatic zones and expected crop maturity cycles.
+# Dataset Quality Validation & Baseline Verification:
+# Validated class distribution, soil characteristics, and image quality across categories.
+# Confirmed prepared agronomic data is suitable for crop advisory development stage.
+# Milestone Sign-off: Panchakshari Jogi.
 # Comprehensive Location Hierarchy & Verified Agronomic Baseline Dataset for Karnataka & India
 
 LOCATION_HIERARCHY = {
