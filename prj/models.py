@@ -15,6 +15,9 @@
 # Relational Database Schema Design:
 # User identity model with role-based access control (farmer, buyer, officer, admin).
 # Password encryption using Werkzeug security (pbkdf2:sha256).
+# Preprocessing & Storage Verification:
+# Storage paths, foreign keys, and cascading rules verified across all relational models.
+# Backend & database milestone sign-off by Kiran Muttappa Andani.
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
