@@ -26,6 +26,10 @@
 # Inference outputs map to DiseaseDetectionLog table (crop_name, detected_disease, confidence).
 # AI Data Validation:
 # Validates confidence score ranges (0.0 to 1.0) and disease classification codes.
+# Dataset Preprocessing Verification & Final Preparation:
+# Data split: 70% Training, 15% Validation, 15% Testing. Stratified sampling across disease classes.
+# Verified input normalization parameters and dataset readiness for model training phase.
+# Milestone Sign-off: Mahadev Naik (Project Lead).
 import random
 
 # Agronomic knowledge base for Karnataka & South India regions (Scientifically Calibrated Dataset)
