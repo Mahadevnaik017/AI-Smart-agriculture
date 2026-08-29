@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Settings & Preferences – Smart Agriculture{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-gear" style="color: var(--primary);"></i> Settings & System Preferences</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Customize language, theme preferences, district weather alerts, and notification subscriptions.</p>
+  </div>
+</div>
+
+<div class="glass-card" style="max-width: 720px; margin: 0 auto 2.5rem auto;">
+  <form method="POST" action="{{ url_for('main.settings') }}">
+    
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+      <i class="fa-solid fa-globe"></i> Language & Region Preferences
+    </h3>
+
+    <div class="form-group">
+      <label class="form-label">Preferred Platform Language</label>
+      <select name="language" class="form-control">
+        <option value="en" selected>English (Default)</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="position: relative;">
+      <label class="form-label">Home District for APMC & Weather Alerts</label>
+      <input type="text" id="home_district_input" name="district" value="{{ current_user.district if current_user and current_user.district else 'Mandya' }}" placeholder="Type district name (e.g. Mysuru, Mandya, Belagavi...)" class="form-control" autocomplete="off" style="font-size: 0.92rem; padding: 0.65rem 0.85rem;" oninput="filterDistrictSuggestions()" onfocus="filterDistrictSuggestions()">
+      
+      <!-- LIVE AUTOCOMPLETE SUGGESTIONS DROPDOWN BELOW INPUT FIELD -->
+      <div id="district_suggestions_list" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 220px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;">
+      </div>
+    </div>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin: 1.5rem 0 1.25rem 0; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+      <i class="fa-solid fa-bell"></i> SMS & WhatsApp Notifications
+    </h3>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+      <label style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; cursor: pointer;">
+        <input type="checkbox" name="notify_mandi" checked style="width: 18px; height: 18px;">
+        Receive daily APMC Mandi price surge SMS alerts
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; cursor: pointer;">
+        <input type="checkbox" name="notify_weather" checked style="width: 18px; height: 18px;">
+        Receive rainfall & weather risk warnings
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600; cursor: pointer;">
+        <input type="checkbox" name="notify_schemes" checked style="width: 18px; height: 18px;">
+        Receive Karnataka Government scheme eligibility notices (Bhoomi, Raitha Siri)
+      </label>
+    </div>
+
+    <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+      <i class="fa-solid fa-floppy-disk"></i> Save Preferences & Settings
+    </button>
+  </form>
+</div>
+
+<script>
+const karnatakaDistricts = [
+  "Bagalkote", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", 
+  "Chamarajanagara", "Chikkaballapura", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", 
+  "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", 
+  "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", 
+  "Tumakuru", "Udupi", "Uttara Kannada", "Vijayanagara", "Vijayapura", "Yadgir"
+];
+
+function filterDistrictSuggestions() {
+  const input = document.getElementById('home_district_input');
+  const suggestionsBox = document.getElementById('district_suggestions_list');
+  if (!input || !suggestionsBox) return;
+
+  const val = input.value.trim().toLowerCase();
+  const matches = karnatakaDistricts.filter(d => d.toLowerCase().includes(val));
+
+  if (matches.length === 0) {
+    suggestionsBox.style.display = 'none';
+    return;
+  }
+
+  suggestionsBox.innerHTML = matches.map(d => `
+    <div onclick="selectDistrictName('${d}')" style="padding: 0.65rem 0.9rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: #2d6a4f; transition: background 0.15s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='transparent'">
+      <i class="fa-solid fa-location-dot" style="margin-right: 0.5rem; color: #52b788;"></i> ${d}
+    </div>
+  `).join('');
+
+  suggestionsBox.style.display = 'block';
+}
+
+function selectDistrictName(name) {
+  const input = document.getElementById('home_district_input');
+  const suggestionsBox = document.getElementById('district_suggestions_list');
+  if (input) input.value = name;
+  if (suggestionsBox) suggestionsBox.style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  const container = document.getElementById('home_district_input')?.parentElement;
+  const suggestionsBox = document.getElementById('district_suggestions_list');
+  if (container && suggestionsBox && !container.contains(e.target)) {
+    suggestionsBox.style.display = 'none';
+  }
+});
+</script>
+{% endblock %}

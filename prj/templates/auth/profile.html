@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile & Account Settings – Mojara{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto;">
+  <div class="glass-card" style="padding: 2rem;">
+    <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1.5rem;">
+      <div class="avatar-circle" style="margin: 0;">{{ current_user.name[0] }}</div>
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary-dark);">{{ current_user.name }}</h2>
+        <div style="font-size: 0.9rem; color: var(--text-muted);">{{ current_user.email }}</div>
+        <span class="role-badge role-{{ current_user.role }}">{{ current_user.role }} Account</span>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.profile') }}">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="name" value="{{ current_user.name }}" required class="form-control">
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" value="{{ current_user.phone or '' }}" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">District</label>
+          <input type="text" name="district" value="{{ current_user.district }}" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Delivery Address / Village</label>
+        <textarea name="address" rows="3" class="form-control">{{ current_user.address or '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">New Password (leave blank to keep current)</label>
+        <input type="password" name="new_password" placeholder="••••••••" class="form-control">
+      </div>
+
+      <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%;">Save Profile Changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

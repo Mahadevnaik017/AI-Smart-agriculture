@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Real-Time Government Agriculture Schemes & Subsidies – Mojara{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 1.5rem;">
+  <div>
+    <div class="hero-badge" style="margin-bottom: 0.5rem;"><i class="fa-solid fa-bolt"></i> Real-Time Live Schemes Portal</div>
+    <h1 class="section-title"><i class="fa-solid fa-building-columns"></i> Government Agriculture Schemes & Subsidies</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Search and discover central and Karnataka state agricultural financial grants, crop insurance, irrigation subsidies, and machinery schemes.</p>
+  </div>
+</div>
+
+<!-- Real-Time Search & Category Filter Toolbar -->
+<div class="glass-card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(27, 67, 50, 0.04) 0%, rgba(82, 183, 136, 0.12) 100%);">
+  <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; margin-bottom: 1.25rem;">
+    <!-- Live Search Input -->
+    <div style="position: relative;">
+      <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 14px; color: var(--primary);"></i>
+      <input type="text" id="scheme-search-input" onkeyup="filterSchemesRealtime()" placeholder="Search scheme name (e.g. Bhoomi, PM-KISAN, RTC, Drip, Insurance, Tractor, Scholarship)..." class="form-control" style="padding-left: 42px; font-size: 1rem; height: 48px; border-radius: 50px;">
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span id="scheme-counter-badge" style="background: var(--primary); color: #ffffff; padding: 0.4rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem;">
+        <i class="fa-solid fa-circle-check"></i> {{ schemes|length }} Active Schemes
+      </span>
+      <button onclick="resetSchemeFilters()" class="btn-mojara btn-secondary-mojara" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">Clear Search</button>
+    </div>
+  </div>
+
+  <!-- Category Pills -->
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="scheme-category-pills">
+    <button class="btn-mojara category-pill active-pill" onclick="selectSchemeCategory('', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">All Schemes</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Land Records & Property', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Bhoomi Land Records (RTC)</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Financial Subsidy', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Financial Subsidy</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Crop Insurance', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Crop Insurance</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Irrigation & Water Conservation', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Irrigation & Water</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Soil Health & Testing', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Soil Health</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Mechanization & Tools', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Mechanization & Tractors</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Organic Farming', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Organic Cluster</button>
+    <button class="btn-mojara category-pill" onclick="selectSchemeCategory('Student Scholarship', this)" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">Farmer Student Scholarship</button>
+  </div>
+</div>
+
+<!-- Schemes Grid -->
+<div class="grid-3" id="schemes-grid">
+  {% for scheme in schemes %}
+    <div class="glass-card scheme-card-item" data-category="{{ scheme.category }}" data-keywords="{{ scheme.title }} {{ scheme.title_kn }} {{ scheme.description }} {{ scheme.eligibility }}" style="display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+      
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <span class="category-badge" style="background: rgba(45, 106, 79, 0.12); color: var(--primary-dark); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 50px;">
+            <i class="fa-solid fa-tag"></i> {{ scheme.category }}
+          </span>
+          <span style="font-size: 0.75rem; color: #2e7d32; font-weight: 700;">
+            <i class="fa-solid fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> Verified Active
+          </span>
+        </div>
+
+        <h3 class="scheme-title" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem; color: var(--primary-dark);">
+          {{ scheme.title }}
+        </h3>
+        
+        {% if scheme.title_kn %}
+          <div class="scheme-title-kn" style="font-size: 0.95rem; color: var(--text-muted); font-weight: 600; margin-bottom: 1rem;">
+            {{ scheme.title_kn }}
+          </div>
+        {% endif %}
+
+        <p class="scheme-desc" style="font-size: 0.9rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1.25rem;">
+          {{ scheme.description }}
+        </p>
+
+        <!-- Benefit Amount Box -->
+        <div style="background: linear-gradient(135deg, rgba(212, 163, 115, 0.18) 0%, rgba(254, 250, 224, 0.4) 100%); border-left: 4px solid var(--earthy-brown); padding: 0.85rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--earthy-brown); text-transform: uppercase;">Direct Financial Benefit</div>
+          <div style="font-size: 1.05rem; font-weight: 800; color: var(--primary-dark);">{{ scheme.benefit_amount }}</div>
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          <strong><i class="fa-solid fa-user-check"></i> Eligibility:</strong> {{ scheme.eligibility }}
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 1rem; display: flex; gap: 0.5rem;">
+        <button onclick="openSchemeGuide('{{ scheme.title }}', '{{ scheme.benefit_amount }}', '{{ scheme.eligibility }}', '{{ scheme.officer_contact }}', '{{ scheme.apply_link }}')" class="btn-mojara btn-secondary-mojara" style="flex: 1; padding: 0.45rem; font-size: 0.82rem;">
+          <i class="fa-solid fa-circle-info"></i> How to Apply
+        </button>
+        <a href="{{ scheme.apply_link }}" target="_blank" class="btn-mojara btn-primary-mojara" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">
+          Portal &rarr;
+        </a>
+      </div>
+
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Empty Result Placeholder -->
+<div id="no-schemes-found" class="glass-card" style="display: none; text-align: center; padding: 3rem; margin-top: 2rem;">
+  <i class="fa-solid fa-file-circle-xmark" style="font-size: 3.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+  <h3 style="font-size: 1.3rem; font-weight: 700;">No Government Schemes Found</h3>
+  <p style="color: var(--text-muted); font-size: 0.9rem;">No scheme matched your search keyword or selected category filter.</p>
+  <button onclick="resetSchemeFilters()" class="btn-mojara btn-primary-mojara" style="margin-top: 1rem;">Reset All Filters</button>
+</div>
+
+<!-- Scheme Application Guide Modal -->
+<div id="scheme-guide-modal" class="mojara-modal">
+  <div class="modal-content" style="max-width: 620px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-dark);"><i class="fa-solid fa-file-signature"></i> Scheme Application Guide</h3>
+      <button onclick="document.getElementById('scheme-guide-modal').classList.remove('active')" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
+    </div>
+
+    <div style="margin-bottom: 1.25rem;">
+      <h2 id="modal-scheme-title" style="font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;"></h2>
+      <div style="background: rgba(45, 106, 79, 0.08); padding: 0.85rem; border-radius: var(--radius-sm); font-size: 0.9rem;">
+        <strong>Benefit:</strong> <span id="modal-scheme-benefit" style="color: var(--primary-dark); font-weight: 700;"></span>
+      </div>
+    </div>
+
+    <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-list-check"></i> Required Documents for Application</h4>
+    <ul style="padding-left: 1.2rem; font-size: 0.88rem; line-height: 1.7; margin-bottom: 1.25rem;">
+      <li>1. Aadhaar Card linked with active Mobile Number & Bank Account</li>
+      <li>2. Karnataka Agricultural Land RTC / Pahani document (Fruit ID / FID Number)</li>
+      <li>3. Bank Passbook copy showing IFSC Code</li>
+      <li>4. Passport size photographs of applicant farmer</li>
+    </ul>
+
+    <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-headset"></i> Officer Contact & Support</h4>
+    <p id="modal-scheme-contact" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;"></p>
+
+    <div style="display: flex; gap: 1rem;">
+      <button onclick="document.getElementById('scheme-guide-modal').classList.remove('active')" class="btn-mojara btn-secondary-mojara" style="flex: 1;">Close</button>
+      <a id="modal-scheme-link" href="#" target="_blank" class="btn-mojara btn-primary-mojara" style="flex: 1; text-align: center;">Go to Official State Portal &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let activeCategoryFilter = '';
+
+function filterSchemesRealtime() {
+  const query = document.getElementById('scheme-search-input').value.toLowerCase().strip ? document.getElementById('scheme-search-input').value.toLowerCase().trim() : document.getElementById('scheme-search-input').value.toLowerCase();
+  const cards = document.querySelectorAll('.scheme-card-item');
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const keywords = card.getAttribute('data-keywords').toLowerCase();
+    const category = card.getAttribute('data-category');
+    
+    const matchesSearch = !query || keywords.includes(query);
+    const matchesCategory = !activeCategoryFilter || category === activeCategoryFilter;
+
+    if (matchesSearch && matchesCategory) {
+      card.style.display = 'flex';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  const counterBadge = document.getElementById('scheme-counter-badge');
+  if (counterBadge) {
+    counterBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${visibleCount} Active Schemes`;
+  }
+
+  const noResultsBox = document.getElementById('no-schemes-found');
+  if (noResultsBox) {
+    noResultsBox.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+}
+
+function selectSchemeCategory(cat, btnElement) {
+  activeCategoryFilter = cat;
+  
+  document.querySelectorAll('.category-pill').forEach(btn => {
+    btn.style.background = 'var(--card-bg)';
+    btn.style.color = 'var(--text-main)';
+  });
+  
+  btnElement.style.background = 'var(--primary)';
+  btnElement.style.color = '#ffffff';
+
+  filterSchemesRealtime();
+}
+
+function resetSchemeFilters() {
+  document.getElementById('scheme-search-input').value = '';
+  activeCategoryFilter = '';
+  
+  document.querySelectorAll('.category-pill').forEach((btn, idx) => {
+    if (idx === 0) {
+      btn.style.background = 'var(--primary)';
+      btn.style.color = '#ffffff';
+    } else {
+      btn.style.background = 'var(--card-bg)';
+      btn.style.color = 'var(--text-main)';
+    }
+  });
+
+  filterSchemesRealtime();
+}
+
+function openSchemeGuide(title, benefit, eligibility, contact, link) {
+  document.getElementById('modal-scheme-title').textContent = title;
+  document.getElementById('modal-scheme-benefit').textContent = benefit;
+  document.getElementById('modal-scheme-contact').textContent = contact || 'District Raitha Samparka Kendra / Department of Agriculture';
+  document.getElementById('modal-scheme-link').href = link;
+  document.getElementById('scheme-guide-modal').classList.add('active');
+}
+</script>
+{% endblock %}

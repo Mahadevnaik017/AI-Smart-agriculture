@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Direct Agriculture Marketplace – Mojara Smart Agriculture{% endblock %}
+
+{% block content %}
+<!-- 2. TOP HEADER — Marketplace heading area with light clean overlay & dynamic status badge -->
+<div class="glass-card" style="margin-bottom: 2rem; position: relative; overflow: hidden; background: linear-gradient(135deg, rgba(15, 45, 25, 0.72) 0%, rgba(27, 94, 32, 0.65) 100%), url('/static/images/hero_bg.jpg') center/cover no-repeat; border: 1px solid rgba(255, 255, 255, 0.2); padding: 2rem 2.2rem; color: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.25);">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px); padding: 0.35rem 0.9rem; border-radius: 50px; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+        <i class="fa-solid fa-circle-check" style="color: #66bb6a;"></i> Verified Farmer Listings
+      </div>
+      <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4); font-family: var(--font-heading);">
+        <i class="fa-solid fa-store" style="color: #a5d6a7;"></i> Direct Agriculture Marketplace
+      </h1>
+      <p style="color: rgba(255, 255, 255, 0.92); font-size: 1rem; max-width: 650px; line-height: 1.5; margin: 0;">
+        Buy farm-fresh crops, certified seeds, organic fertilizers, and tools straight from verified Karnataka farmers without middleman markups.
+      </p>
+    </div>
+
+    <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px; padding: 1rem 1.4rem; text-align: center; min-width: 170px;">
+      <div style="font-size: 2rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+        {{ products|length if not is_fallback else recommended_products|length }}
+      </div>
+      <div style="font-size: 0.82rem; font-weight: 700; color: #a5d6a7; text-transform: uppercase; letter-spacing: 0.5px;">Active Listings</div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-layout" style="align-items: start; gap: 1.75rem;">
+  
+  <!-- 3. LEFT CONTENT — Search & Filters panel -->
+  <aside class="dashboard-sidebar" style="width: 290px; flex-shrink: 0; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 1.4rem; box-shadow: var(--shadow-sm);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--primary-dark); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Search & Filters
+      </h3>
+      <a href="{{ url_for('main.marketplace') }}" style="font-size: 0.78rem; font-weight: 700; color: #c62828; text-decoration: none;">Reset All</a>
+    </div>
+    
+    <form method="GET" action="{{ url_for('main.marketplace') }}" id="marketplace-filter-form">
+      
+      <!-- Search Keyword -->
+      <div class="form-group" style="margin-bottom: 1.1rem;">
+        <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Search Keyword</label>
+        <div style="position: relative;">
+          <input type="text" name="q" value="{{ search_query }}" placeholder="Search ragi, tomato, rice, seeds..." class="form-control" style="padding-left: 2.2rem; font-size: 0.88rem;">
+          <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
+        </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="form-group" style="margin-bottom: 1.1rem;">
+        <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Product Category</label>
+        <select name="category" class="form-control" style="font-size: 0.88rem;">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- District Short Answer Autocomplete Filter -->
+      <div class="form-group" style="margin-bottom: 1.1rem; position: relative;">
+        <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">District / Location</label>
+        <div style="position: relative;">
+          <input type="text" id="mkt_district_input" name="district" value="{{ district_filter }}" placeholder="Type district (e.g. Mandya, Haveri, Mysuru, Jalgaon...)" class="form-control" autocomplete="off" style="padding-left: 2.2rem; font-size: 0.88rem;" oninput="filterMktDistrictSuggestions()" onfocus="filterMktDistrictSuggestions()">
+          <i class="fa-solid fa-location-dot" style="position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
+        </div>
+
+        <!-- AUTOCOMPLETE DROPDOWN LIST BELOW FIELD -->
+        <div id="mkt_district_suggestions_list" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); box-shadow: 0 10px 25px rgba(0,0,0,0.18); max-height: 220px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;">
+        </div>
+      </div>
+
+      <!-- Sort By -->
+      <div class="form-group" style="margin-bottom: 1.1rem;">
+        <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">Sort By</label>
+        <select name="sort" class="form-control" style="font-size: 0.88rem;">
+          <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest Arrivals</option>
+          <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+          <option value="rating_high" {% if sort_by == 'rating_high' %}selected{% endif %}>Highest Customer Rating</option>
+        </select>
+      </div>
+
+      <!-- Stock Availability Toggle -->
+      <div class="form-group" style="margin-bottom: 0.85rem;">
+        <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; color: var(--text-main);">
+          <input type="checkbox" name="in_stock" value="true" {% if in_stock_only %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--primary);">
+          In Stock Availability Only
+        </label>
+      </div>
+
+      <!-- Organic Only Toggle -->
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; color: var(--primary-dark);">
+          <input type="checkbox" id="organic" name="organic" value="true" {% if organic_only %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--accent-green);">
+          <i class="fa-solid fa-leaf" style="color: var(--accent-green);"></i> 100% Certified Organic Only
+        </label>
+      </div>
+
+      <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.7rem; font-size: 0.9rem; font-weight: 700;">
+        <i class="fa-solid fa-filter"></i> Apply Filters
+      </button>
+    </form>
+  </aside>
+
+  <!-- 4. CENTER/RIGHT CONTENT — Product cards grid -->
+  <main style="flex: 1; min-width: 0;">
+    
+    {% if is_fallback %}
+      <div class="glass-card" style="margin-bottom: 1.5rem; border-left: 4px solid #ffb703; background: rgba(255, 243, 205, 0.9); padding: 1.2rem 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; color: #f57f17;"></i>
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: #b78103; margin: 0 0 0.2rem 0;">No exact match found for "{{ search_query }}"</h3>
+            <p style="font-size: 0.88rem; color: #555; margin: 0;">Showing recommended fresh farm produce items from verified Karnataka producers instead.</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% set display_items = products if not is_fallback else recommended_products %}
+
+    {% if display_items|length == 0 %}
+      <div class="glass-card" style="text-align: center; padding: 4rem 2rem; margin-bottom: 2rem;">
+        <i class="fa-solid fa-location-slash" style="font-size: 3.5rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 1rem;"></i>
+        {% if district_filter %}
+          <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">No listings found for this district</h3>
+          <p style="font-size: 0.92rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.5rem auto;">
+            No active agricultural listings currently registered in <strong>"{{ district_filter }}"</strong> district. Explore listings from Mandya, Mysuru, Haveri, or Dharwad!
+          </p>
+        {% else %}
+          <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">No Agricultural Listings Available</h3>
+          <p style="font-size: 0.92rem; color: var(--text-muted); max-width: 450px; margin: 0 auto 1.5rem auto;">Try resetting your filters or searching for another crop or district name.</p>
+        {% endif %}
+        <a href="{{ url_for('main.marketplace') }}" class="btn-mojara btn-primary-mojara" style="padding: 0.65rem 1.5rem;">View All Available Listings</a>
+      </div>
+    {% else %}
+      
+      <!-- UNIFORM RESPONSIVE EQUAL-HEIGHT PRODUCT GRID -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; align-items: stretch;">
+        {% for product in display_items %}
+          <div class="glass-card product-card" style="display: flex; flex-direction: column; height: 100%; border-radius: var(--radius-md); overflow: hidden; padding: 0; border: 1px solid var(--card-border); background: var(--glass-bg); transition: transform 0.25s ease, box-shadow 0.25s ease;">
+            
+            <!-- PRODUCT IMAGE AREA WITH BADGES -->
+            <div style="height: 185px; width: 100%; position: relative; overflow: hidden; background: #f4f6f4;">
+              <img src="{{ product.display_image_url }}" alt="{{ product.title }}" onerror="this.onerror=null; this.src='/static/images/crops/default.jpg';" style="width: 100%; height: 100%; object-fit: cover;">
+              
+              {% if product.is_organic %}
+                <span class="tag-organic" style="position: absolute; top: 10px; left: 10px; font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 50px; background: rgba(46, 125, 50, 0.9); color: #ffffff; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.3);">
+                  <i class="fa-solid fa-leaf"></i> 100% Organic
+                </span>
+              {% else %}
+                <span style="position: absolute; top: 10px; left: 10px; font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 50px; background: rgba(15, 45, 25, 0.85); color: #ffffff; backdrop-filter: blur(6px);">
+                  <i class="fa-solid fa-shield-halved" style="color: #66bb6a;"></i> Verified
+                </span>
+              {% endif %}
+
+              <button onclick="toggleWishlist({{ product.id }}, this)" class="btn-icon" style="position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; background: rgba(255,255,255,0.92); color: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);" title="Save to Wishlist">
+                <i class="fa-regular fa-heart" style="font-size: 0.95rem;"></i>
+              </button>
+            </div>
+
+            <!-- CARD BODY CONTENT -->
+            <div style="padding: 1.1rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 0.5rem; margin-bottom: 0.35rem;">
+                  <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--primary-dark); margin: 0; line-height: 1.3;">{{ product.title }}</h3>
+                  <div style="color: #f59e0b; font-size: 0.82rem; font-weight: 800; white-space: nowrap;">
+                    <i class="fa-solid fa-star"></i> {{ product.average_rating }}
+                  </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem;">
+                  <i class="fa-solid fa-user-check" style="color: var(--primary);"></i> {{ product.farmer.name if product.farmer else 'Mandya Farmer' }}
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.85rem; background: rgba(0,0,0,0.03); padding: 0.35rem 0.6rem; border-radius: 6px;">
+                  <span><i class="fa-solid fa-location-dot" style="color: #2e7d32;"></i> {{ product.district }}, KA</span>
+                  <span style="font-weight: 700; color: {% if product.stock_quantity > 0 %}#2e7d32{% else %}#c62828{% endif %};">
+                    {% if product.stock_quantity > 0 %}{{ product.stock_quantity }} {{ product.unit }}s in stock{% else %}Out of Stock{% endif %}
+                  </span>
+                </div>
+              </div>
+
+              <!-- PRODUCT PRICE AREA -->
+              <div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.9rem; padding-top: 0.5rem; border-top: 1px dashed var(--card-border);">
+                  <div style="display: flex; align-items: baseline; gap: 0.4rem;">
+                    <span style="font-size: 1.35rem; font-weight: 900; color: #1b5e20;">₹{{ product.final_price }}</span>
+                    {% if product.discount_percent and product.discount_percent > 0 %}
+                      <span style="text-decoration: line-through; font-size: 0.85rem; color: var(--text-muted);">₹{{ product.price }}</span>
+                    {% endif %}
+                    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">/ {{ product.unit }}</span>
+                  </div>
+
+                  {% if product.discount_percent and product.discount_percent > 0 %}
+                    <span style="font-size: 0.72rem; font-weight: 800; background: #e8f5e9; color: #2e7d32; padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid #a5d6a7;">
+                      -{{ product.discount_percent }}% OFF
+                    </span>
+                  {% endif %}
+                </div>
+
+                <!-- PRODUCT ACTION BUTTONS ALIGNED AT BOTTOM -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.45rem;">
+                  <!-- Add to Cart -->
+                  <button onclick="addToCart({{ product.id }})" class="btn-mojara btn-primary-mojara" style="padding: 0.55rem 0.4rem; font-size: 0.78rem; font-weight: 700; justify-content: center;" title="Add item to shopping cart">
+                    <i class="fa-solid fa-cart-plus"></i> Add
+                  </button>
+
+                  <!-- Buy Now -->
+                  <button onclick="buyNow({{ product.id }})" class="btn-mojara" style="background: #1b5e20; color: #ffffff; padding: 0.55rem 0.4rem; font-size: 0.78rem; font-weight: 700; justify-content: center; border-radius: var(--radius-sm);" title="Instant 1-Click Purchase">
+                    <i class="fa-solid fa-bolt"></i> Buy
+                  </button>
+
+                  <!-- Details Link -->
+                  <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn-mojara btn-secondary-mojara" style="padding: 0.55rem 0.55rem; font-size: 0.78rem;" title="View Product Details Page">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </main>
+</div>
+
+<script>
+const allMarketplaceDistricts = [
+  "Bagalkote", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", 
+  "Chamarajanagara", "Chikkaballapura", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", 
+  "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Jalgaon", "Kalaburagi", "Kodagu", 
+  "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", 
+  "Tumakuru", "Udupi", "Uttara Kannada", "Vijayanagara", "Vijayapura", "Yadgir"
+];
+
+function filterMktDistrictSuggestions() {
+  const input = document.getElementById('mkt_district_input');
+  const suggestionsBox = document.getElementById('mkt_district_suggestions_list');
+  if (!input || !suggestionsBox) return;
+
+  const val = input.value.trim().toLowerCase();
+  const matches = allMarketplaceDistricts.filter(d => d.toLowerCase().includes(val));
+
+  if (matches.length === 0) {
+    suggestionsBox.style.display = 'none';
+    return;
+  }
+
+  suggestionsBox.innerHTML = matches.map(d => `
+    <div onclick="selectMktDistrictName('${d}')" style="padding: 0.6rem 0.85rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; font-weight: 600; color: #1b5e20; display: flex; align-items: center; justify-content: space-between; transition: background 0.15s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='transparent'">
+      <span><i class="fa-solid fa-location-dot" style="margin-right: 0.4rem; color: #2e7d32;"></i> ${d}</span>
+      <span style="font-size: 0.72rem; color: var(--text-muted);">Select</span>
+    </div>
+  `).join('');
+
+  suggestionsBox.style.display = 'block';
+}
+
+function selectMktDistrictName(name) {
+  const input = document.getElementById('mkt_district_input');
+  const suggestionsBox = document.getElementById('mkt_district_suggestions_list');
+  if (input) input.value = name;
+  if (suggestionsBox) suggestionsBox.style.display = 'none';
+  document.getElementById('marketplace-filter-form').submit();
+}
+
+document.addEventListener('click', function(e) {
+  const container = document.getElementById('mkt_district_input')?.parentElement?.parentElement;
+  const suggestionsBox = document.getElementById('mkt_district_suggestions_list');
+  if (container && suggestionsBox && !container.contains(e.target)) {
+    suggestionsBox.style.display = 'none';
+  }
+});
+</script>
+{% endblock %}

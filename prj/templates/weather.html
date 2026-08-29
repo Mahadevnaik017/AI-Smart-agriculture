@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Weather Forecast & Agromet Advisory – Smart Agriculture{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-cloud-sun-rain" style="color: #0288d1;"></i> Karnataka Agromet Weather Forecast & Advisory</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Real-time precipitation, humidity, temperature trends, and crop irrigation advice across Karnataka districts.</p>
+  </div>
+</div>
+
+<!-- District Weather Grid -->
+<div class="grid-3" style="margin-bottom: 2.5rem;">
+  {% for w in weather_data %}
+    <div class="glass-card" style="border-top: 4px solid #0288d1;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary-dark);">
+          <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> {{ w.district }}
+        </h3>
+        <span style="font-size: 0.8rem; font-weight: 700; background: rgba(2, 136, 209, 0.12); color: #0288d1; padding: 0.25rem 0.65rem; border-radius: 50px;">
+          Rain Prob: {{ w.rain_prob }}
+        </span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="font-size: 2.5rem; color: #0288d1;">
+          <i class="fa-solid {{ w.icon }}"></i>
+        </div>
+        <div>
+          <div style="font-size: 2rem; font-weight: 800; color: var(--primary-dark); line-height: 1;">{{ w.temp }}°C</div>
+          <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">{{ w.condition }}</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; background: rgba(255,255,255,0.7); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem;">
+        <div><strong>Humidity:</strong> {{ w.humidity }}%</div>
+        <div><strong>Wind Speed:</strong> {{ w.wind }}</div>
+      </div>
+
+      <div style="font-size: 0.88rem; background: rgba(45, 106, 79, 0.08); padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--primary); color: var(--primary-dark);">
+        <strong><i class="fa-solid fa-lightbulb"></i> Farming Advisory:</strong> {{ w.advisory }}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Weather Trend Chart -->
+<div class="glass-card">
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;">
+    <i class="fa-solid fa-chart-area" style="color: #0288d1;"></i> 7-Day Rainfall & Temperature Trend (Southern Karnataka)
+  </h3>
+  <div class="chart-container" style="height: 300px;">
+    <canvas id="weatherTrendChart"></canvas>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('weatherTrendChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+          {
+            label: 'Temperature (°C)',
+            data: [26, 27, 28, 29, 27, 28, 26],
+            borderColor: '#f57f17',
+            backgroundColor: 'rgba(245, 127, 23, 0.1)',
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: 'Rainfall Volume (mm)',
+            data: [12, 5, 0, 2, 18, 24, 8],
+            borderColor: '#0288d1',
+            backgroundColor: 'rgba(2, 136, 209, 0.2)',
+            fill: true,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

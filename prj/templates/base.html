@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Smart Agriculture – AI Crop, Weather, Mandi Rates & Govt Schemes{% endblock %}</title>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-layout-wrapper">
+    
+    <!-- RESPONSIVE LEFT SIDEBAR -->
+    <aside class="agri-sidebar" id="agri-sidebar">
+      <div class="sidebar-header">
+        <a href="{{ url_for('main.index') }}" class="sidebar-brand">
+          <i class="fa-solid fa-wheat-awn-circle-exclamation"></i>
+          <span>Smart Agriculture</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="{{ url_for('main.index') }}" class="sidebar-link {% if request.path == '/' %}active{% endif %}">
+              <i class="fa-solid fa-house"></i> <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.marketplace') }}" class="sidebar-link {% if request.path.startswith('/marketplace') or request.path.startswith('/product') %}active{% endif %}">
+              <i class="fa-solid fa-store"></i> <span>Direct Marketplace</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.ai_crop') }}" class="sidebar-link {% if request.path == '/ai/crop-recommendation' %}active{% endif %}">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> <span>AI Crop Match</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.ai_fertilizer') }}" class="sidebar-link {% if request.path == '/ai/fertilizer-recommendation' %}active{% endif %}">
+              <i class="fa-solid fa-flask-vial"></i> <span>Fertilizer Guide</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.ai_disease') }}" class="sidebar-link {% if request.path == '/ai/disease-detection' %}active{% endif %}">
+              <i class="fa-solid fa-camera"></i> <span>Disease Detector</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.apmc_prices') }}" class="sidebar-link {% if request.path == '/apmc-prices' %}active{% endif %}">
+              <i class="fa-solid fa-chart-line"></i> <span>APMC / Mandi Rates</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.schemes') }}" class="sidebar-link {% if request.path == '/schemes' %}active{% endif %}">
+              <i class="fa-solid fa-building-columns"></i> <span>Government Schemes</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.weather') }}" class="sidebar-link {% if request.path == '/weather' %}active{% endif %}">
+              <i class="fa-solid fa-cloud-sun-rain"></i> <span>Weather</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.news') }}" class="sidebar-link {% if request.path == '/news' %}active{% endif %}">
+              <i class="fa-solid fa-newspaper"></i> <span>Agriculture News</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.forum') }}" class="sidebar-link {% if request.path == '/forum' %}active{% endif %}">
+              <i class="fa-solid fa-comments"></i> <span>Community Forum</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.settings') }}" class="sidebar-link {% if request.path == '/settings' %}active{% endif %}">
+              <i class="fa-solid fa-gear"></i> <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- MAIN RIGHT CONTENT CONTAINER -->
+    <div class="main-content-area">
+      
+      <!-- TOP HEADER BAR -->
+      <header class="mojara-navbar">
+        <div class="navbar-container">
+          
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <!-- 3-Dot / Sidebar Collapse Toggle Button -->
+            <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="btn-icon" title="Toggle Sidebar Menu">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+
+            <!-- LIVE IST TIMEZONE CLOCK DISPLAY -->
+            <div id="live-ist-clock-pill" style="font-size: 0.78rem; font-weight: 700; color: #1b5e20; background: rgba(46, 125, 50, 0.12); backdrop-filter: blur(8px); padding: 0.35rem 0.85rem; border-radius: 50px; border: 1px solid rgba(46, 125, 50, 0.25); display: flex; align-items: center; gap: 0.45rem;">
+              <i class="fa-solid fa-clock" style="color: #2e7d32;"></i> <span id="live-ist-clock-text">09-08-2026 18:00:24 IST</span>
+            </div>
+          </div>
+
+          <div class="nav-actions">
+            <!-- Multilingual Toggle -->
+            <div class="lang-switch-group" style="display: flex; gap: 0.3rem;">
+              <button onclick="setLanguage('en')" class="btn-mojara lang-btn" data-lang="en" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">EN</button>
+              <button onclick="setLanguage('kn')" class="btn-mojara lang-btn" data-lang="kn" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">ಕನ್ನಡ</button>
+            </div>
+
+            <!-- Dark / Light Theme Toggle -->
+            <button id="theme-toggle-btn" class="btn-icon" title="Toggle Theme" style="background: rgba(255, 255, 255, 0.18);">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <!-- Cart Drawer Trigger Button -->
+            <button onclick="toggleCartDrawer()" class="btn-icon" title="View Shopping Cart" style="background: rgba(255, 255, 255, 0.18);">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span id="cart-badge-count" class="badge-counter" style="display: none;">0</span>
+            </button>
+
+            <!-- User Profile & Authentication -->
+            {% if current_user.is_authenticated %}
+              <a href="{{ url_for('dashboard.buyer_dashboard') if current_user.role == 'buyer' else (url_for('dashboard.farmer_dashboard') if current_user.role == 'farmer' else url_for('dashboard.admin_dashboard')) }}" class="btn-mojara btn-secondary-mojara" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+                <i class="fa-solid fa-user"></i> {{ current_user.name.split()[0] if current_user.name else 'Profile' }}
+              </a>
+              <a href="{{ url_for('auth.logout') }}" class="btn-mojara btn-secondary-mojara" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; color: #c62828; border: 1px solid rgba(198,40,40,0.3);" title="Logout Account">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+              </a>
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn-mojara btn-secondary-mojara" style="padding: 0.45rem 1rem; font-size: 0.85rem;" data-i18n="login">Sign In</a>
+              <a href="{{ url_for('auth.register') }}" class="btn-mojara btn-primary-mojara" style="padding: 0.45rem 1rem; font-size: 0.85rem;" data-i18n="register">Register</a>
+            {% endif %}
+          </div>
+        </div>
+      </header>
+
+      <!-- FLASH MESSAGES -->
+      <div class="main-wrapper" style="margin-bottom: 0;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="alert-container">
+              {% for category, message in messages %}
+                <div class="alert-mojara alert-{{ category }}">
+                  <span><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
+                  <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- MAIN PAGE CONTENT -->
+      <main class="main-wrapper">
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="mojara-footer" style="margin-top: 4rem;">
+        <div style="max-width: 1340px; margin: 0 auto; text-align: center; font-size: 0.88rem; color: var(--text-muted);">
+          &copy; 2026 Smart Agriculture Platform – Direct Mandi Trade, AI Crop Advisory & Govt Schemes Portal.
+        </div>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <!-- EXPRESS GUEST & MULTI-STAGE CHECKOUT MODAL -->
+  <div id="global-cart-modal" class="mojara-modal">
+    <div class="modal-content" style="max-width: 680px;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-dark);"><i class="fa-solid fa-cart-flatbed"></i> Express Shopping Cart & Multi-Stage Checkout</h3>
+        <button onclick="closeGlobalCartModal()" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <!-- CART STEP VIEW -->
+      <div id="global-cart-step-view">
+        <div id="global-cart-items-container">
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading cart...</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+          <span style="font-size: 1.2rem; font-weight: 800; color: var(--primary-dark);">Total Price: ₹<span id="global-cart-total-val">0.00</span></span>
+          <button id="global-checkout-btn" onclick="startGlobalCheckout()" class="btn-mojara btn-primary-mojara" style="padding: 0.75rem 1.5rem;">
+            Proceed to Checkout &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- STAGE 1: Basic Information -->
+      <div id="global-checkout-stage-1" style="display: none;">
+        <div style="background: rgba(45, 106, 79, 0.08); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-weight: 700; color: var(--primary-dark);">
+          Stage 1 of 2: Basic Contact Information & Delivery Address
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="g_checkout_name" value="{{ current_user.name if current_user.is_authenticated else '' }}" required placeholder="Enter full name" class="form-control">
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="g_checkout_email" value="{{ current_user.email if current_user.is_authenticated else '' }}" required placeholder="Enter email address" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile Phone</label>
+            <input type="tel" id="g_checkout_phone" value="{{ current_user.phone if current_user.is_authenticated else '' }}" required placeholder="Enter 10-digit mobile number" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Delivery Address & Pincode</label>
+          <textarea id="g_checkout_address" required rows="3" placeholder="Enter delivery house address and pincode" class="form-control">{{ current_user.address if current_user.is_authenticated else '' }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button type="button" onclick="backToCartView()" class="btn-mojara btn-secondary-mojara" style="flex: 1;">&larr; Back to Cart</button>
+          <button type="button" onclick="goToGlobalStage2()" class="btn-mojara btn-primary-mojara" style="flex: 2;">
+            Next: Select Payment Method &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- STAGE 2: Payment Selection (UPI QR Code vs COD) -->
+      <div id="global-checkout-stage-2" style="display: none;">
+        <div style="background: rgba(45, 106, 79, 0.08); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-weight: 700; color: var(--primary-dark);">
+          Stage 2 of 2: Payment Method
+        </div>
+
+        <form onsubmit="submitGlobalCheckoutOrder(event)">
+          <div class="form-group">
+            <label class="form-label">Select Payment Option</label>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+              <label style="background: rgba(255,255,255,0.9); padding: 0.85rem; border-radius: var(--radius-sm); border: 2px solid var(--primary); cursor: pointer; text-align: center; font-weight: 700;">
+                <input type="radio" name="g_payment_method" value="UPI" checked onclick="handleGlobalPaymentMethodChange('UPI')">
+                <i class="fa-solid fa-qrcode" style="color: #1565c0;"></i> UPI / GPay QR Code
+              </label>
+              <label style="background: rgba(255,255,255,0.9); padding: 0.85rem; border-radius: var(--radius-sm); border: 2px solid var(--card-border); cursor: pointer; text-align: center; font-weight: 700;">
+                <input type="radio" name="g_payment_method" value="COD" onclick="handleGlobalPaymentMethodChange('COD')">
+                <i class="fa-solid fa-hand-holding-dollar" style="color: #e65100;"></i> Cash on Delivery
+              </label>
+            </div>
+          </div>
+
+          <!-- REAL GOOGLE PAY & UPI QR CODE CONTAINER -->
+          <div id="g_upi_container" style="text-align: center; background: #ffffff; padding: 1.5rem; border-radius: var(--radius-sm); border: 2px solid var(--primary); margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+            
+            <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" style="height: 24px;">
+              <span style="font-weight: 800; font-size: 1.05rem; color: #1f1f1f;">Google Pay / All UPI Apps</span>
+            </div>
+
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+              Scan QR Code to Pay Total Amount Automatically
+            </div>
+            
+            <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary-dark); margin: 0.4rem 0 0.85rem 0;">
+              Exact Locked Amount: ₹<span id="g_qr_total_amount">0.00</span>
+            </div>
+
+            <!-- Authentic Google Pay QR Code Display (Kiran Andani) -->
+            <div style="position: relative; display: inline-block; padding: 10px; background: #ffffff; border-radius: 16px; border: 2px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <img id="gpay_qr_img" src="{{ url_for('static', filename='images/gpay_qr.jpg') }}" alt="Google Pay QR Code - Kiran Andani" style="width: 230px; height: auto; border-radius: 12px; object-fit: contain;">
+            </div>
+            
+            <div style="font-size: 0.88rem; color: #2e7d32; font-weight: 700; margin-top: 0.75rem;">
+              <i class="fa-solid fa-shield-halved"></i> Google Pay Verified Payee: <strong>Kiran Andani</strong> (<code>kiranandani2005@okicici</code>)
+            </div>
+          </div>
+
+          <!-- COD CONTAINER -->
+          <div id="g_cod_container" style="display: none; background: rgba(230, 81, 0, 0.08); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid rgba(230, 81, 0, 0.2); margin-bottom: 1.25rem; text-align: center;">
+            <i class="fa-solid fa-hand-holding-dollar" style="font-size: 2.2rem; color: #e65100; margin-bottom: 0.5rem;"></i>
+            <h4 style="font-size: 1.1rem; font-weight: 700; color: #e65100;">Cash on Delivery (COD) Selected</h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+              Pay exact total amount of <strong>₹<span id="g_cod_total_amount">0.00</span></strong> to the delivery person upon arrival at your doorstep.
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="button" onclick="backToGlobalStage1()" class="btn-mojara btn-secondary-mojara" style="flex: 1;">&larr; Back to Details</button>
+            <button type="submit" class="btn-mojara btn-primary-mojara" style="flex: 2;">
+              <i class="fa-solid fa-check"></i> Place Order & Confirm &rarr;
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/charts_config.js') }}"></script>
+  <script>
+  function updateLiveISTClock() {
+    const clockEl = document.getElementById('live-ist-clock-text');
+    if (!clockEl) return;
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istDate = new Date(utc + (3600000 * 5.5));
+    const pad = n => n < 10 ? '0' + n : n;
+    let hours = istDate.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const dateStr = `${pad(istDate.getDate())}-${pad(istDate.getMonth()+1)}-${istDate.getFullYear()}`;
+    const timeStr = `${pad(hours)}:${pad(istDate.getMinutes())}:${pad(istDate.getSeconds())} ${ampm}`;
+    clockEl.textContent = `${dateStr} ${timeStr} IST`;
+  }
+  setInterval(updateLiveISTClock, 1000);
+  updateLiveISTClock();
+  </script>
+</body>
+</html>

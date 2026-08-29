@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account – Mojara Smart Agriculture{% endblock %}
+
+{% block content %}
+<div style="max-width: 540px; margin: 2rem auto;">
+  <div class="glass-card" style="padding: 2.5rem;">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <i class="fa-solid fa-user-plus" style="font-size: 2.2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+      <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary-dark);">Register for Mojara</h2>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">Join the Smart Agriculture Marketplace & AI Ecosystem</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <div class="form-group">
+        <label class="form-label">I am registering as a:</label>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          <label style="background: rgba(45, 106, 79, 0.08); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--card-border); cursor: pointer; text-align: center; font-weight: 700;">
+            <input type="radio" name="role" value="farmer" checked style="margin-right: 0.3rem;"> Farmer / Producer
+          </label>
+          <label style="background: rgba(45, 106, 79, 0.08); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--card-border); cursor: pointer; text-align: center; font-weight: 700;">
+            <input type="radio" name="role" value="buyer" style="margin-right: 0.3rem;"> Buyer / Consumer
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="name" required placeholder="e.g., Ramesh Gowda" class="form-control">
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" required placeholder="ramesh@gmail.com" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Phone</label>
+          <input type="tel" name="phone" required placeholder="+91 9845012345" class="form-control">
+        </div>
+      </div>
+
+      <!-- REPLACED DROPDOWN WITH CLEAN SHORT ANSWER INPUT FIELD -->
+      <div class="form-group">
+        <label class="form-label">District / Location</label>
+        <input type="text" name="district" required placeholder="e.g., Mandya, Mysuru, Nashik, or your district..." class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Village / Street Address</label>
+        <input type="text" name="address" placeholder="Dodda Byranahalli, Post Mandya" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" required placeholder="At least 6 characters" class="form-control">
+      </div>
+
+      <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+        Create Account &rarr;
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+      Already have an account? <a href="{{ url_for('auth.login') }}" style="font-weight: 700;">Sign In Here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

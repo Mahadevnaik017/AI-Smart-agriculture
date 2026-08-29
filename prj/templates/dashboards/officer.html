@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Agricultural Officer Portal – Mojara{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 1.5rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-user-shield"></i> Agricultural Officer Verification & Advisory Hub</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Official portal for producer verification, crop advisories, and regional district statistics.</p>
+  </div>
+  <button onclick="document.getElementById('announcement-modal').classList.add('active')" class="btn-mojara btn-primary-mojara">
+    <i class="fa-solid fa-bullhorn"></i> Publish Officer Advisory
+  </button>
+</div>
+
+<!-- Regional Yield Chart & Producer Distribution -->
+<div class="dashboard-layout" style="margin-bottom: 2rem;">
+  <!-- Chart -->
+  <div class="glass-card">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-chart-pie"></i> District Agricultural Yield Performance</h3>
+    <div class="chart-container">
+      <canvas id="districtYieldChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Verified Producer Counts -->
+  <div class="glass-card">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-users"></i> Registered Farmers per District</h3>
+    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+      {% for dist, count in district_counts.items() %}
+        <li style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--card-border);">
+          <strong><i class="fa-solid fa-location-dot"></i> {{ dist }} District</strong>
+          <span style="background: rgba(45, 106, 79, 0.1); color: var(--primary); font-weight: 700; padding: 0.1rem 0.6rem; border-radius: 50px;">{{ count }} Farmers</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Announcements Table -->
+<div class="glass-card" style="margin-bottom: 2rem;">
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-bullhorn"></i> My Published Official Advisories</h3>
+  <div class="table-responsive">
+    <table class="mojara-table">
+      <thead>
+        <tr>
+          <th>Advisory Title</th>
+          <th>District Scope</th>
+          <th>Priority Level</th>
+          <th>Published Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for anc in announcements %}
+          <tr>
+            <td><strong>{{ anc.title }}</strong></td>
+            <td>{{ anc.district }}</td>
+            <td>
+              <span style="background: #fff3e0; color: #e65100; padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 700; font-size: 0.75rem;">
+                {{ anc.priority }}
+              </span>
+            </td>
+            <td>{{ anc.created_at.strftime('%Y-%m-%d') }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-muted);">No advisories published yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal for Publishing Announcement -->
+<div id="announcement-modal" class="mojara-modal">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-dark);"><i class="fa-solid fa-bullhorn"></i> Publish Officer Agricultural Advisory</h3>
+      <button onclick="document.getElementById('announcement-modal').classList.remove('active')" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
+    </div>
+
+    <form method="POST" action="{{ url_for('dashboard.create_announcement') }}">
+      <div class="form-group">
+        <label class="form-label">Advisory Headline (English)</label>
+        <input type="text" name="title" required placeholder="e.g., Fall Armyworm pest alert for maize" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Advisory Headline (Kannada)</label>
+        <input type="text" name="title_kn" placeholder="ಉದಾ: ಮೆಕ್ಕೆಜೋಳ ಬೆಳೆಗಾರರಿಗೆ ಕೀಟಬಾಧೆ ಮುನ್ನೆಚ್ಚರಿಕೆ" class="form-control">
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Target District</label>
+          <select name="district" class="form-control">
+            <option value="All Districts">All Karnataka Districts</option>
+            <option value="Dharwad">Dharwad</option>
+            <option value="Mandya">Mandya</option>
+            <option value="Haveri">Haveri</option>
+            <option value="Kolar">Kolar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Priority Level</label>
+          <select name="priority" class="form-control">
+            <option value="Normal">Normal Advisory</option>
+            <option value="High">High Priority</option>
+            <option value="Urgent">Urgent Alert</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Advisory Content & Guidelines</label>
+        <textarea name="content" rows="4" required placeholder="Describe preventative steps, recommended bio-pesticides..." class="form-control"></textarea>
+      </div>
+
+      <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; margin-top: 0.5rem;">
+        Broadcast Advisory Announcement &rarr;
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

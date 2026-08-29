@@ -1,0 +1,698 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Crop Recommendation Engine – Mojara Smart Agriculture{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 1.5rem;">
+  <div>
+    <h1 class="section-title" style="font-size: 1.8rem; font-weight: 800; color: var(--primary-dark);">
+      <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> Location-Aware AI Crop Recommendation Engine
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.2rem;">
+      Search your State, District, Taluk, and Village to generate evidence-based agronomic crop suitability recommendations tailored to your field.
+    </p>
+  </div>
+</div>
+
+<!-- MANDATORY DECISION SUPPORT NOTICE -->
+<div style="background: rgba(2, 136, 209, 0.08); border: 1px solid rgba(2, 136, 209, 0.25); color: #0277bd; padding: 0.75rem 1.25rem; border-radius: var(--radius-md); font-size: 0.82rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.65rem;">
+  <i class="fa-solid fa-circle-info" style="font-size: 1.1rem; color: #0288d1; flex-shrink: 0;"></i>
+  <div>
+    <strong>Decision-Support Notice:</strong> Recommendations are calculated dynamically using connected State → District → Taluk → Village hierarchy and entered soil/climate parameters. Yield, cost, market price, and profit may vary with weather and farming practices.
+  </div>
+</div>
+
+<!-- BALANCED TWO-COLUMN RESPONSIVE DASHBOARD CONTAINER -->
+<div class="ai-crop-dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; align-items: start;">
+  
+  <!-- LEFT COLUMN: COMPLETE SOIL & CLIMATE INPUT FORM -->
+  <div class="glass-card" style="padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); background: var(--glass-bg); width: 100%; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+      <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary-dark); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Soil & Climate Parameters
+      </h3>
+      <button type="button" onclick="resetCropForm()" style="background: none; border: none; font-size: 0.78rem; font-weight: 700; color: #c62828; cursor: pointer;">
+        <i class="fa-solid fa-rotate-left"></i> Clear All
+      </button>
+    </div>
+
+    <!-- ERROR VALIDATION BANNER -->
+    <div id="ai-form-error-banner" style="display: none; background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem;">
+      <i class="fa-solid fa-circle-exclamation"></i> <span id="ai-form-error-msg"></span>
+    </div>
+
+    <form method="POST" action="{{ url_for('main.ai_crop') }}" id="ai-crop-form" onsubmit="handleAiCropSubmit(event)">
+      
+      <!-- LOGICAL GROUP 1: CONNECTED LOCATION HIERARCHY WITH LETTER-BY-LETTER SEARCH -->
+      <div style="margin-bottom: 1.25rem;">
+        <div style="font-size: 0.82rem; font-weight: 800; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fa-solid fa-map-location-dot"></i> Connected Location Hierarchy
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+          
+          <!-- 1. SEARCHABLE STATE INPUT -->
+          <div class="form-group" style="margin-bottom: 0; position: relative;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">State</label>
+            <input type="text" id="loc_state_input" name="state" value="{{ prediction.location_hierarchy.state if (prediction and prediction.location_hierarchy) else '' }}" placeholder="Select State" class="form-control" autocomplete="off" style="font-size: 0.88rem;" oninput="onStateFilterInput()" onfocus="onStateFilterInput()">
+            <div id="state_autocomplete_box" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); box-shadow: 0 10px 25px rgba(0,0,0,0.18); max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;"></div>
+          </div>
+
+          <!-- 2. SEARCHABLE DISTRICT INPUT (LETTER-BY-LETTER) -->
+          <div class="form-group" style="margin-bottom: 0; position: relative;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">District</label>
+            <input type="text" id="loc_district_input" name="district" value="{{ prediction.location_hierarchy.district if (prediction and prediction.location_hierarchy) else '' }}" placeholder="Select District" class="form-control" autocomplete="off" style="font-size: 0.88rem;" oninput="onDistrictFilterInput()" onfocus="onDistrictFilterInput()">
+            <div id="district_autocomplete_box" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); box-shadow: 0 10px 25px rgba(0,0,0,0.18); max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;"></div>
+          </div>
+
+          <!-- 3. SEARCHABLE TALUK INPUT -->
+          <div class="form-group" style="margin-bottom: 0; position: relative;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">Taluk</label>
+            <input type="text" id="loc_taluk_input" name="taluk" value="{{ prediction.location_hierarchy.taluk if (prediction and prediction.location_hierarchy) else '' }}" placeholder="Select Taluk" class="form-control" autocomplete="off" style="font-size: 0.88rem;" oninput="onTalukFilterInput()" onfocus="onTalukFilterInput()">
+            <div id="taluk_autocomplete_box" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); box-shadow: 0 10px 25px rgba(0,0,0,0.18); max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;"></div>
+          </div>
+
+          <!-- 4. SEARCHABLE VILLAGE INPUT -->
+          <div class="form-group" style="margin-bottom: 0; position: relative;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">Village</label>
+            <input type="text" id="loc_village_input" name="village" value="{{ prediction.location_hierarchy.village if (prediction and prediction.location_hierarchy) else '' }}" placeholder="Search Village (e.g. Handigund)" class="form-control" autocomplete="off" style="font-size: 0.88rem;" oninput="onVillageSearchInput()" onfocus="onVillageSearchInput()">
+            <div id="village_autocomplete_box" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); box-shadow: 0 10px 25px rgba(0,0,0,0.18); max-height: 220px; overflow-y: auto; z-index: 1000; margin-top: 0.25rem;"></div>
+          </div>
+
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">Cultivation Season</label>
+            <select name="season" id="season" class="form-control" style="font-size: 0.88rem;">
+              <option value="Kharif">Kharif (Monsoon)</option>
+              <option value="Rabi">Rabi (Winter)</option>
+              <option value="Summer">Summer / Irrigated</option>
+              <option value="Perennial">Year-Round / Perennial</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">Water Availability</label>
+            <select name="water_avail" id="water_avail" class="form-control" style="font-size: 0.88rem;">
+              <option value="Medium">Medium (Canal / Borewell)</option>
+              <option value="High">High (Perennial River / Drip)</option>
+              <option value="Low">Low (Rainfed / Dryland)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGICAL GROUP 2: SOIL & CHEMICAL PROPERTIES (pH 0.0 - 14.0 Slider) -->
+      <div style="margin-bottom: 1.25rem; border-top: 1px dashed var(--card-border); padding-top: 1rem;">
+        <div style="font-size: 0.82rem; font-weight: 800; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fa-solid fa-flask"></i> Soil Properties & Nutrients
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700;">Soil Texture / Type</label>
+            <select name="soil_type" id="soil_type" class="form-control" style="font-size: 0.88rem;">
+              <option value="Deep Black Soil">Deep Black Soil (Black Cotton)</option>
+              <option value="Red Loam">Red Loam Soil</option>
+              <option value="Sandy Loam">Sandy Loam</option>
+              <option value="Clay Loam">Clay Loam</option>
+              <option value="Laterite Soil">Laterite Soil (Coastal / Malnad)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <!-- SOIL pH SLIDER (RANGE 0.0 TO 14.0) -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin: 0;">Soil pH Level (0 - 14)</label>
+              <span id="ph_val" style="font-size: 0.88rem; font-weight: 900; color: #1b5e20; background: #e8f5e9; padding: 0.1rem 0.5rem; border-radius: 4px;">{{ prediction.inputs.ph if prediction else '7.0' }}</span>
+            </div>
+            <input type="range" id="ph" name="ph" min="0.0" max="14.0" step="0.1" value="{{ prediction.inputs.ph if prediction else 7.0 }}" class="range-slider" style="width:100%; accent-color: var(--primary);" oninput="document.getElementById('ph_val').textContent = this.value">
+            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span>0.0 (Acidic)</span><span>7.0 (Neutral)</span><span>14.0 (Alkaline)</span>
+            </div>
+          </div>
+
+          <!-- Nitrogen Slider -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin: 0;">Nitrogen (N kg/ha)</label>
+              <span id="nitrogen_val" style="font-size: 0.88rem; font-weight: 900; color: #1b5e20; background: #e8f5e9; padding: 0.1rem 0.5rem; border-radius: 4px;">{{ prediction.inputs.nitrogen if prediction else 40 }}</span>
+            </div>
+            <input type="range" id="nitrogen" name="nitrogen" min="0" max="200" step="5" value="{{ prediction.inputs.nitrogen if prediction else 40 }}" class="range-slider" style="width:100%; accent-color: var(--primary);" oninput="document.getElementById('nitrogen_val').textContent = this.value">
+            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span>0 kg/ha</span><span>100 kg/ha</span><span>200 kg/ha</span>
+            </div>
+          </div>
+
+          <!-- Phosphorus Slider -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin: 0;">Phosphorus (P kg/ha)</label>
+              <span id="phosphorus_val" style="font-size: 0.88rem; font-weight: 900; color: #1b5e20; background: #e8f5e9; padding: 0.1rem 0.5rem; border-radius: 4px;">{{ prediction.inputs.phosphorus if prediction else 30 }}</span>
+            </div>
+            <input type="range" id="phosphorus" name="phosphorus" min="0" max="150" step="5" value="{{ prediction.inputs.phosphorus if prediction else 30 }}" class="range-slider" style="width:100%; accent-color: var(--primary);" oninput="document.getElementById('phosphorus_val').textContent = this.value">
+            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span>0 kg/ha</span><span>75 kg/ha</span><span>150 kg/ha</span>
+            </div>
+          </div>
+
+          <!-- Potassium Slider -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin: 0;">Potassium (K kg/ha)</label>
+              <span id="potassium_val" style="font-size: 0.88rem; font-weight: 900; color: #1b5e20; background: #e8f5e9; padding: 0.1rem 0.5rem; border-radius: 4px;">{{ prediction.inputs.potassium if prediction else 30 }}</span>
+            </div>
+            <input type="range" id="potassium" name="potassium" min="0" max="180" step="5" value="{{ prediction.inputs.potassium if prediction else 30 }}" class="range-slider" style="width:100%; accent-color: var(--primary);" oninput="document.getElementById('potassium_val').textContent = this.value">
+            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span>0 kg/ha</span><span>90 kg/ha</span><span>180 kg/ha</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGICAL GROUP 3: CLIMATE PARAMETERS -->
+      <div style="margin-bottom: 1.25rem; border-top: 1px dashed var(--card-border); padding-top: 1rem;">
+        <div style="font-size: 0.82rem; font-weight: 800; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fa-solid fa-cloud-sun-rain"></i> Regional Climate Factors
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin: 0;">Annual Rainfall (mm)</label>
+              <span id="rainfall_val" style="font-size: 0.88rem; font-weight: 900; color: #1b5e20; background: #e8f5e9; padding: 0.1rem 0.5rem; border-radius: 4px;">{{ prediction.inputs.rainfall if prediction else 650 }}</span>
+            </div>
+            <input type="range" id="rainfall" name="rainfall" min="100" max="3500" step="50" value="{{ prediction.inputs.rainfall if prediction else 650 }}" class="range-slider" style="width:100%; accent-color: var(--primary);" oninput="document.getElementById('rainfall_val').textContent = this.value">
+            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span>100 mm</span><span>1800 mm</span><span>3500 mm</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin: 0;">Avg Temp (°C)</label>
+              <span id="temperature_val" style="font-size: 0.88rem; font-weight: 900; color: #1b5e20; background: #e8f5e9; padding: 0.1rem 0.5rem; border-radius: 4px;">{{ prediction.inputs.temp if prediction else 27 }}</span>
+            </div>
+            <input type="range" id="temperature" name="temperature" min="10" max="45" step="1" value="{{ prediction.inputs.temp if prediction else 27 }}" class="range-slider" style="width:100%; accent-color: var(--primary);" oninput="document.getElementById('temperature_val').textContent = this.value">
+            <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span>10 °C</span><span>27 °C</span><span>45 °C</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="ai-submit-btn" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800; border-radius: var(--radius-sm); margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+        <i class="fa-solid fa-brain"></i> <span id="ai-submit-btn-text">Generate Agronomic Recommendation</span>
+      </button>
+
+    </form>
+  </div>
+
+  <!-- RIGHT COLUMN: EVIDENCE-BASED AI RESULT DASHBOARD -->
+  <div style="width: 100%; box-sizing: border-box;">
+    {% if prediction %}
+      
+      {% if not prediction.is_sufficient_data %}
+        <!-- INSUFFICIENT DATA / LOW CONFIDENCE STATE -->
+        <div class="glass-card" style="padding: 2.5rem; text-align: center; border-radius: var(--radius-md); border: 1px solid #ffcdd2; background: #ffebee; color: #b71c1c;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #c62828; margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0 0 0.5rem 0;">Insufficient Data for Reliable Recommendation</h3>
+          <p style="font-size: 0.9rem; margin: 0 auto; max-width: 420px; line-height: 1.5;">
+            {{ prediction.message }}
+          </p>
+        </div>
+      {% else %}
+        
+        <!-- DATA SOURCE & LOCATION HIERARCHY BADGE -->
+        <div style="background: rgba(46, 125, 50, 0.08); border: 1px solid rgba(46, 125, 50, 0.25); color: #1b5e20; padding: 0.61rem 1rem; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <i class="fa-solid fa-location-crosshairs" style="color: #2e7d32; margin-right: 0.3rem;"></i> Target Location: <strong>{{ prediction.location_hierarchy.village or prediction.location_hierarchy.district or 'Karnataka' }}</strong>
+          </div>
+          <span style="background: #2e7d32; color: #ffffff; padding: 0.15rem 0.6rem; border-radius: 50px; font-size: 0.74rem;">
+            {{ prediction.location_hierarchy.data_level_badge }}
+          </span>
+        </div>
+
+        <!-- MAJOR CROPS GROWN IN LOCATION (separate from AI recommendations) -->
+        {% if major_crops %}
+        <div class="glass-card" style="padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid rgba(245, 124, 0, 0.3); background: rgba(255, 243, 224, 0.6); margin-bottom: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.9rem;">
+            <h3 style="font-size: 1rem; font-weight: 800; color: #e65100; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-seedling" style="color: #f57c00;"></i>
+              Major Crops Grown in {{ major_crops_location }}
+            </h3>
+            <span style="font-size: 0.72rem; color: #bf360c; background: rgba(191, 54, 12, 0.1); border: 1px solid rgba(191, 54, 12, 0.2); padding: 0.15rem 0.55rem; border-radius: 50px; font-weight: 700;">
+              <i class="fa-solid fa-database" style="font-size: 0.7rem;"></i> {{ major_crops_source }}
+            </span>
+          </div>
+          <p style="font-size: 0.78rem; color: #e65100; margin: 0 0 0.85rem 0; font-style: italic;">
+            These crops are verified as commonly cultivated in this location and are considered separately from the AI agronomic suitability evaluation below.
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.85rem;">
+            {% for mc in major_crops %}
+            <div style="display: flex; align-items: center; gap: 0.7rem; background: #ffffff; border: 1px solid rgba(245, 124, 0, 0.25); border-radius: 10px; padding: 0.65rem 0.85rem; min-width: 180px; flex: 1;">
+              <img src="{{ mc.image }}" alt="{{ mc.name }}" onerror="this.onerror=null; this.src='/static/images/crops/default.jpg';" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #ffe0b2;">
+              <div>
+                <div style="font-size: 0.9rem; font-weight: 800; color: #bf360c;">{{ mc.name }}</div>
+                <div style="font-size: 0.74rem; color: #888; font-weight: 600;">{{ mc.name_kn }}</div>
+                <div style="font-size: 0.72rem; color: #f57c00; margin-top: 0.15rem; font-weight: 700;">{{ mc.season }}</div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 0.1rem; line-height: 1.3;">{{ mc.note }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- TOP RECOMMENDATION BANNER FOR BEST MATCH (#1) -->
+        {% set top_crop = prediction.top_recommendations[0] %}
+        <div class="glass-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(15, 45, 25, 0.94) 0%, rgba(27, 94, 32, 0.90) 100%); color: #ffffff; padding: 1.5rem; border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <img src="{{ top_crop.image_url }}" alt="{{ top_crop.crop_name }}" onerror="this.onerror=null; this.src='/static/images/crops/default.jpg';" style="width: 72px; height: 72px; border-radius: 12px; object-fit: cover; border: 2px solid #a5d6a7; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+              <div>
+                <span style="display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); color: #ffffff; font-size: 0.75rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 50px; margin-bottom: 0.3rem; border: 1px solid rgba(255,255,255,0.3);">
+                  🏆 {{ top_crop.badge }}
+                </span>
+                <h2 style="font-size: 1.8rem; font-weight: 900; color: #a5d6a7; margin: 0 0 0.1rem 0; font-family: var(--font-heading);">
+                  {{ top_crop.crop_name }}
+                </h2>
+                <div style="font-size: 0.95rem; color: rgba(255,255,255,0.9); font-weight: 600;">{{ top_crop.crop_name_kn }}</div>
+              </div>
+            </div>
+
+            <div style="text-align: right; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 0.6rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25);">
+              <div style="font-size: 1.8rem; font-weight: 900; color: #ffffff;">{{ top_crop.match_score }}%</div>
+              <div style="font-size: 0.7rem; font-weight: 800; color: #a5d6a7; text-transform: uppercase;">Agronomic Suitability Index</div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.88rem; line-height: 1.5; color: rgba(255,255,255,0.92); margin-bottom: 1.25rem; background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 6px;">
+            {{ top_crop.description }}
+          </p>
+
+          <!-- DYNAMIC YIELD & FINANCIAL ESTIMATE GRID -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; background: rgba(0, 0, 0, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+            <div>
+              <div style="font-size: 0.74rem; color: rgba(255,255,255,0.75); text-transform: uppercase;">Expected Yield Range</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">{{ top_crop.yield_range }}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.74rem; color: rgba(255,255,255,0.75); text-transform: uppercase;">Verified Market Price</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">{{ top_crop.market_price_formatted }}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.74rem; color: rgba(255,255,255,0.75); text-transform: uppercase;">Est. Production Cost / Acre</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #ef9a9a;">{{ top_crop.prod_cost_formatted }}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.74rem; color: rgba(255,255,255,0.75); text-transform: uppercase;">Est. Net Profit / Acre</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #a5d6a7;">{{ top_crop.profit_formatted }}</div>
+              <div style="font-size: 0.65rem; color: rgba(255,255,255,0.6);">(Estimated; not guaranteed)</div>
+            </div>
+          </div>
+
+          <!-- WHY RECOMMENDED FACTOR BREAKDOWN -->
+          <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.6rem 0; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fa-solid fa-list-check" style="color: #a5d6a7;"></i> Location & Environmental Compatibility
+            </h4>
+            <ul style="margin: 0 0 0.85rem 0; padding-left: 1.2rem; font-size: 0.86rem; line-height: 1.55; color: rgba(255,255,255,0.92);">
+              {% for reason in top_crop.reasons %}
+                <li>{{ reason }}</li>
+              {% endfor %}
+            </ul>
+
+            {% if top_crop.warnings %}
+              <div style="background: rgba(239, 83, 80, 0.2); border: 1px solid rgba(239, 83, 80, 0.4); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #ffcdd2;">
+                <strong><i class="fa-solid fa-triangle-exclamation"></i> Irrigation & Stress Considerations:</strong>
+                <ul style="margin: 0.3rem 0 0 0; padding-left: 1.2rem;">
+                  {% for w in top_crop.warnings %}
+                    <li>{{ w }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- TOP 3 CROP RANKING COMPARISON CARDS -->
+        <div class="glass-card" style="padding: 1.4rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin-bottom: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--primary-dark); margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-list-ol" style="color: var(--primary);"></i> Top 3 Evidence-Based Crop Rankings
+          </h3>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            {% for crop in prediction.top_recommendations %}
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 1rem; background: {% if crop.rank == 1 %}rgba(46, 125, 50, 0.08){% else %}rgba(0,0,0,0.02){% endif %}; border: 1px solid {% if crop.rank == 1 %}#a5d6a7{% else %}var(--card-border){% endif %}; border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 0.85rem;">
+                  <img src="{{ crop.image_url }}" alt="{{ crop.crop_name }}" onerror="this.onerror=null; this.src='/static/images/crops/default.jpg';" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <strong style="font-size: 0.95rem; color: var(--primary-dark);">{{ crop.crop_name }}</strong>
+                      <span style="font-size: 0.72rem; font-weight: 800; background: {% if crop.rank == 1 %}#2e7d32{% elif crop.rank == 2 %}#0288d1{% else %}#7b1fa2{% endif %}; color: #fff; padding: 0.1rem 0.45rem; border-radius: 4px;">{{ crop.badge }}</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">Yield: {{ crop.yield_range }} | Est. Profit: <strong style="color: #2e7d32;">{{ crop.profit_formatted }}</strong></div>
+                  </div>
+                </div>
+
+                <div style="text-align: right; min-width: 90px;">
+                  <div style="font-size: 1.15rem; font-weight: 900; color: #1b5e20;">{{ crop.match_score }}%</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Suitability</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- DYNAMIC NUTRIENT RECOMMENDATION ENGINE & POP GUIDANCE -->
+        <div class="glass-card" style="padding: 1.4rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--primary-dark); margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-flask-vial" style="color: var(--primary);"></i> Soil- & Crop-Specific Fertilizer Recommendation Engine
+          </h3>
+
+          <div style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: #1b5e20; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+              [AI Agronomic Nutrient Adjustment]
+            </div>
+            <div style="background: rgba(46, 125, 50, 0.06); padding: 0.85rem 1rem; border-radius: 6px; border-left: 3px solid #2e7d32;">
+              <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.88rem; color: var(--text-main); line-height: 1.6;">
+                {% for fline in top_crop.fertilizer_custom %}
+                  <li>{{ fline }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: #0277bd; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+              [Standard State Package of Practices (PoP)]
+            </div>
+            <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-main); margin: 0; background: rgba(2, 136, 209, 0.06); padding: 0.85rem 1rem; border-radius: 6px; border-left: 3px solid #0288d1;">
+              {{ top_crop.pop_guidance }}
+            </p>
+          </div>
+
+          <button type="button" onclick="resetCropForm()" class="btn-mojara btn-secondary-mojara" style="width: 100%; padding: 0.65rem; font-size: 0.88rem; font-weight: 700;">
+            <i class="fa-solid fa-rotate-left"></i> Modify Parameters & Run New Evaluation
+          </button>
+        </div>
+
+      {% endif %}
+
+    {% else %}
+      
+      <!-- INITIAL EMPTY STATE (WHEN NO INPUT IS SUBMITTED YET) -->
+      <div class="glass-card" style="padding: 3rem 2rem; text-align: center; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+        <div style="width: 75px; height: 75px; background: rgba(46, 125, 50, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+          <i class="fa-solid fa-location-dot" style="font-size: 2.4rem; color: var(--primary);"></i>
+        </div>
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--primary-dark); margin: 0 0 0.6rem 0;">Location-Specific Agronomic Advisory</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 460px; margin: 0 auto 1.75rem auto; line-height: 1.5;">
+          Enter your location (State → District → Taluk → Village) and soil & climate information to get a location-specific crop recommendation.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; text-align: left;">
+          <div style="background: rgba(0,0,0,0.03); padding: 0.9rem; border-radius: 8px;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.2rem;"><i class="fa-solid fa-sitemap" style="color: var(--primary);"></i> Strict Cascade</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">State → District → Taluk → Village connected hierarchy.</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.03); padding: 0.85rem; border-radius: 8px;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.2rem;"><i class="fa-solid fa-vial" style="color: var(--primary);"></i> pH 0 - 14 Range</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">Full agronomic pH spectrum slider.</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.03); padding: 0.85rem; border-radius: 8px;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.2rem;"><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Dynamic Crops</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">Calculated from location & environmental data.</div>
+          </div>
+        </div>
+      </div>
+
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- JAVASCRIPT FOR LETTER-BY-LETTER SEARCHABLE AUTOCOMPLETE FOR STATE, DISTRICT, TALUK, AND VILLAGE -->
+<script>
+// 1. STATE LETTER-BY-LETTER AUTOCOMPLETE FILTER
+function onStateFilterInput() {
+  const input = document.getElementById('loc_state_input');
+  const box = document.getElementById('state_autocomplete_box');
+  if (!input || !box) return;
+
+  const q = input.value.trim().toLowerCase();
+
+  fetch('/api/locations/states')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success || !data.states) return;
+      const filtered = data.states.filter(s => s.toLowerCase().includes(q));
+
+      if (filtered.length === 0) {
+        box.innerHTML = '<div style="padding: 0.6rem; color: #888; font-size: 0.82rem; text-align: center;">No state found</div>';
+      } else {
+        box.innerHTML = filtered.map(s => `
+          <div onclick="selectStateItem('${s}')" style="padding: 0.55rem 0.85rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; font-weight: 700; color: #1b5e20; transition: background 0.15s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='transparent'">
+            <i class="fa-solid fa-map" style="margin-right: 0.4rem; color: #2e7d32;"></i> ${s}
+          </div>
+        `).join('');
+      }
+      box.style.display = 'block';
+    });
+}
+
+function selectStateItem(stateName) {
+  document.getElementById('loc_state_input').value = stateName;
+  document.getElementById('state_autocomplete_box').style.display = 'none';
+  
+  // Clear dependent fields
+  document.getElementById('loc_district_input').value = '';
+  document.getElementById('loc_taluk_input').value = '';
+  document.getElementById('loc_village_input').value = '';
+}
+
+// 2. DISTRICT LETTER-BY-LETTER AUTOCOMPLETE FILTER
+function onDistrictFilterInput() {
+  const stateVal = document.getElementById('loc_state_input').value.trim();
+  const input = document.getElementById('loc_district_input');
+  const box = document.getElementById('district_autocomplete_box');
+  if (!input || !box) return;
+
+  const q = input.value.trim().toLowerCase();
+
+  fetch(`/api/locations/districts?state=${encodeURIComponent(stateVal || 'Karnataka')}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success || !data.districts) return;
+
+      // Strict letter-by-letter filtering
+      let filtered = data.districts;
+      if (q) {
+        filtered = data.districts.filter(d => d.toLowerCase().includes(q));
+      }
+
+      if (filtered.length === 0) {
+        box.innerHTML = '<div style="padding: 0.6rem; color: #888; font-size: 0.82rem; text-align: center;">No district found</div>';
+      } else {
+        box.innerHTML = filtered.map(d => `
+          <div onclick="selectDistrictItem('${d}')" style="padding: 0.55rem 0.85rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; font-weight: 700; color: #1b5e20; transition: background 0.15s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='transparent'">
+            <i class="fa-solid fa-location-dot" style="margin-right: 0.4rem; color: #2e7d32;"></i> ${d}
+          </div>
+        `).join('');
+      }
+      box.style.display = 'block';
+    });
+}
+
+function selectDistrictItem(districtName) {
+  document.getElementById('loc_district_input').value = districtName;
+  document.getElementById('district_autocomplete_box').style.display = 'none';
+
+  if (!document.getElementById('loc_state_input').value) {
+    document.getElementById('loc_state_input').value = 'Karnataka';
+  }
+
+  // Clear dependent fields
+  document.getElementById('loc_taluk_input').value = '';
+  document.getElementById('loc_village_input').value = '';
+}
+
+// 3. TALUK LETTER-BY-LETTER AUTOCOMPLETE FILTER
+function onTalukFilterInput() {
+  const stateVal = document.getElementById('loc_state_input').value.trim() || 'Karnataka';
+  const districtVal = document.getElementById('loc_district_input').value.trim();
+  const input = document.getElementById('loc_taluk_input');
+  const box = document.getElementById('taluk_autocomplete_box');
+  if (!input || !box) return;
+
+  const q = input.value.trim().toLowerCase();
+
+  fetch(`/api/locations/taluks?state=${encodeURIComponent(stateVal)}&district=${encodeURIComponent(districtVal)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success || !data.taluks) return;
+
+      let filtered = data.taluks;
+      if (q) {
+        filtered = data.taluks.filter(t => t.toLowerCase().includes(q));
+      }
+
+      if (filtered.length === 0) {
+        box.innerHTML = '<div style="padding: 0.6rem; color: #888; font-size: 0.82rem; text-align: center;">No taluk found</div>';
+      } else {
+        box.innerHTML = filtered.map(t => `
+          <div onclick="selectTalukItem('${t}')" style="padding: 0.55rem 0.85rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; font-weight: 700; color: #1b5e20; transition: background 0.15s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='transparent'">
+            <i class="fa-solid fa-tree-city" style="margin-right: 0.4rem; color: #2e7d32;"></i> ${t}
+          </div>
+        `).join('');
+      }
+      box.style.display = 'block';
+    });
+}
+
+function selectTalukItem(talukName) {
+  document.getElementById('loc_taluk_input').value = talukName;
+  document.getElementById('taluk_autocomplete_box').style.display = 'none';
+  document.getElementById('loc_village_input').value = '';
+}
+
+// 4. VILLAGE LETTER-BY-LETTER SEARCH & AUTOCOMPLETE
+function onVillageSearchInput() {
+  const input = document.getElementById('loc_village_input');
+  const box = document.getElementById('village_autocomplete_box');
+  if (!input || !box) return;
+
+  const val = input.value.trim();
+  if (val.length < 1) {
+    box.style.display = 'none';
+    return;
+  }
+
+  fetch(`/api/locations/search?q=${encodeURIComponent(val)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.results && data.results.length > 0) {
+        box.innerHTML = data.results.map(item => `
+          <div onclick='selectVillageResult(${JSON.stringify(item)})' style="padding: 0.55rem 0.85rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.15s;" onmouseover="this.style.background='#e8f5e9'" onmouseout="this.style.background='transparent'">
+            <div style="font-size: 0.85rem; font-weight: 800; color: #1b5e20;">
+              <i class="fa-solid fa-location-dot" style="margin-right: 0.35rem; color: #2e7d32;"></i> ${item.village}
+            </div>
+            <div style="font-size: 0.72rem; color: #666;">
+              Taluk: ${item.taluk} | District: ${item.district} | State: ${item.state}
+            </div>
+          </div>
+        `).join('');
+        box.style.display = 'block';
+      } else {
+        box.innerHTML = '<div style="padding: 0.6rem; color: #888; font-size: 0.82rem; text-align: center;">No village found</div>';
+        box.style.display = 'block';
+      }
+    });
+}
+
+// Selecting Village from Autocomplete fills State -> District -> Taluk -> Village AND Baseline Agronomic Soil Data!
+function selectVillageResult(item) {
+  document.getElementById('loc_village_input').value = item.village;
+  document.getElementById('loc_state_input').value = item.state;
+  document.getElementById('loc_district_input').value = item.district;
+  document.getElementById('loc_taluk_input').value = item.taluk;
+
+  document.getElementById('village_autocomplete_box').style.display = 'none';
+
+  // Pre-fill baseline soil data for selected village
+  if (item.agri_baseline) {
+    const base = item.agri_baseline;
+    if (base.soil) document.getElementById('soil_type').value = base.soil;
+    if (base.ph !== undefined) {
+      document.getElementById('ph').value = base.ph;
+      document.getElementById('ph_val').textContent = base.ph;
+    }
+    if (base.n !== undefined) {
+      document.getElementById('nitrogen').value = base.n;
+      document.getElementById('nitrogen_val').textContent = base.n;
+    }
+    if (base.p !== undefined) {
+      document.getElementById('phosphorus').value = base.p;
+      document.getElementById('phosphorus_val').textContent = base.p;
+    }
+    if (base.k !== undefined) {
+      document.getElementById('potassium').value = base.k;
+      document.getElementById('potassium_val').textContent = base.k;
+    }
+    if (base.rainfall !== undefined) {
+      document.getElementById('rainfall').value = base.rainfall;
+      document.getElementById('rainfall_val').textContent = base.rainfall;
+    }
+    if (base.temp !== undefined) {
+      document.getElementById('temperature').value = base.temp;
+      document.getElementById('temperature_val').textContent = base.temp;
+    }
+  }
+}
+
+// Hide Autocomplete boxes when clicking outside
+document.addEventListener('click', function(e) {
+  const stateBox = document.getElementById('state_autocomplete_box');
+  const distBox = document.getElementById('district_autocomplete_box');
+  const talukBox = document.getElementById('taluk_autocomplete_box');
+  const villBox = document.getElementById('village_autocomplete_box');
+
+  if (stateBox && !document.getElementById('loc_state_input')?.parentElement.contains(e.target)) stateBox.style.display = 'none';
+  if (distBox && !document.getElementById('loc_district_input')?.parentElement.contains(e.target)) distBox.style.display = 'none';
+  if (talukBox && !document.getElementById('loc_taluk_input')?.parentElement.contains(e.target)) talukBox.style.display = 'none';
+  if (villBox && !document.getElementById('loc_village_input')?.parentElement.contains(e.target)) villBox.style.display = 'none';
+});
+
+// Form Submission & Hierarchy Validation Handler
+function handleAiCropSubmit(e) {
+  const errBanner = document.getElementById('ai-form-error-banner');
+  const errText = document.getElementById('ai-form-error-msg');
+  errBanner.style.display = 'none';
+
+  const stateVal = document.getElementById('loc_state_input').value.trim();
+  const distVal = document.getElementById('loc_district_input').value.trim();
+
+  if (!stateVal || !distVal) {
+    e.preventDefault();
+    errText.textContent = 'Please enter or select a valid State and District before generating agronomic recommendation.';
+    errBanner.style.display = 'block';
+    return false;
+  }
+
+  const btn = document.getElementById('ai-submit-btn');
+  const btnText = document.getElementById('ai-submit-btn-text');
+  if (btn && btnText) {
+    btn.disabled = true;
+    btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Evaluating location-specific agronomic data...';
+  }
+}
+
+// Reset Form Function
+function resetCropForm() {
+  document.getElementById('ai-crop-form').reset();
+  document.getElementById('loc_state_input').value = '';
+  document.getElementById('loc_district_input').value = '';
+  document.getElementById('loc_taluk_input').value = '';
+  document.getElementById('loc_village_input').value = '';
+
+  document.getElementById('ph_val').textContent = '7.0';
+  document.getElementById('ph').value = '7.0';
+  document.getElementById('nitrogen_val').textContent = '40';
+  document.getElementById('nitrogen').value = '40';
+  document.getElementById('phosphorus_val').textContent = '30';
+  document.getElementById('phosphorus').value = '30';
+  document.getElementById('potassium_val').textContent = '30';
+  document.getElementById('potassium').value = '30';
+  document.getElementById('rainfall_val').textContent = '650';
+  document.getElementById('rainfall').value = '650';
+  document.getElementById('temperature_val').textContent = '27';
+  document.getElementById('temperature').value = '27';
+
+  document.getElementById('ai-form-error-banner').style.display = 'none';
+}
+</script>
+{% endblock %}

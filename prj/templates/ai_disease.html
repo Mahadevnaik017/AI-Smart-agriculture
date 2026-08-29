@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Crop Disease Detector – Mojara Smart Agriculture{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-bug"></i> AI Crop Disease Detection Engine</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Upload a leaf photo or pick a sample symptom image to diagnose fungal, bacterial, and viral crop diseases instantly.</p>
+  </div>
+</div>
+
+<div class="dashboard-layout">
+  <!-- Upload & Input Form -->
+  <div class="glass-card">
+    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--primary-dark);"><i class="fa-solid fa-camera"></i> Upload Crop Image or Symptoms</h3>
+    
+    <!-- Quick Sample Presets -->
+    <div style="margin-bottom: 1.5rem; background: rgba(45, 106, 79, 0.06); padding: 1rem; border-radius: var(--radius-sm);">
+      <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">Or Try Quick Sample Leaf Inputs:</div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn-mojara btn-secondary-mojara sample-leaf-btn" data-crop="Tomato" data-symptom="brown target rings on lower leaves" style="font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+          <i class="fa-solid fa-leaf"></i> Tomato Early Blight Sample
+        </button>
+        <button type="button" class="btn-mojara btn-secondary-mojara sample-leaf-btn" data-crop="Paddy" data-symptom="spindle-shaped eye spots on leaf" style="font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+          <i class="fa-solid fa-seedling"></i> Rice Blast Sample
+        </button>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('main.ai_disease') }}" enctype="multipart/form-data">
+      <div class="form-group">
+        <label class="form-label">Crop Name</label>
+        <select id="crop_name" name="crop_name" class="form-control">
+          <option value="Tomato">Tomato (ಟೊಮೆಟೊ)</option>
+          <option value="Paddy">Paddy / Rice (ಭತ್ತ)</option>
+          <option value="Ragi">Ragi (ರಾಗಿ)</option>
+          <option value="General Crop">General Crop / Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Upload Leaf Image</label>
+        <div id="image-drop-zone" style="border: 2px dashed var(--card-border); border-radius: var(--radius-sm); padding: 2rem; text-align: center; cursor: pointer; background: rgba(255,255,255,0.5);">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+          <p style="font-size: 0.9rem; font-weight: 600;">Drag & drop leaf photo here, or browse file</p>
+          <input type="file" id="crop_image" name="crop_image" accept="image/*" style="margin-top: 0.75rem;">
+        </div>
+        <img id="image-preview" src="#" alt="Preview" style="display: none; max-height: 200px; margin: 1rem auto 0 auto; border-radius: var(--radius-sm);">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Visible Symptoms Description (Optional)</label>
+        <textarea id="symptoms" name="symptoms" rows="3" placeholder="Describe spots, yellowing, leaf curling..." class="form-control"></textarea>
+      </div>
+
+      <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+        <i class="fa-solid fa-magnifying-glass-chart"></i> Run AI Disease Diagnosis
+      </button>
+    </form>
+  </div>
+
+  <!-- Diagnosis Output View -->
+  <div>
+    {% if diagnosis %}
+      <div class="glass-card" style="margin-bottom: 1.5rem; border-top: 5px solid #e63946;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="background: #ffe5e7; color: #c62828; font-weight: 700; font-size: 0.82rem; padding: 0.3rem 0.8rem; border-radius: 50px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Disease Diagnosed
+          </span>
+          <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">Confidence: {{ diagnosis.confidence }}%</span>
+        </div>
+
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">
+          {{ diagnosis.detected_disease }}
+        </h2>
+        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">Affected Crop: {{ diagnosis.crop_name }}</div>
+
+        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem;"><i class="fa-solid fa-stethoscope"></i> Observed Symptoms</h4>
+        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 1.25rem;">{{ diagnosis.symptoms }}</p>
+
+        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem;"><i class="fa-solid fa-shield-halved"></i> Cultural & Preventive Steps</h4>
+        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 1.25rem;">{{ diagnosis.prevention }}</p>
+
+        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem;"><i class="fa-solid fa-prescription-bottle-medical"></i> Chemical & Organic Treatment</h4>
+        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 1.5rem;">{{ diagnosis.treatment }}</p>
+
+        <div style="background: rgba(45, 106, 79, 0.08); padding: 1rem; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Recommended Treatment Remedy on Mojara:</div>
+            <strong style="font-size: 0.95rem; color: var(--primary-dark);">{{ diagnosis.recommended_product }}</strong>
+          </div>
+          <a href="{{ url_for('main.marketplace', q=diagnosis.crop_name) }}" class="btn-mojara btn-primary-mojara" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">
+            Order Remedy &rarr;
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="text-align: center; padding: 3rem;">
+        <i class="fa-solid fa-bug" style="font-size: 3.5rem; color: #e65100; margin-bottom: 1rem;"></i>
+        <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem;">Leaf Image Diagnosis Ready</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+          Upload a photo of the affected crop leaf or select one of the sample buttons to run instant disease analysis.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

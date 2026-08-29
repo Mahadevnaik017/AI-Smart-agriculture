@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Smart Agriculture & Direct Mandi Marketplace{% endblock %}
+
+{% block content %}
+<!-- MAIN HERO HEADER SECTION -->
+<section class="hero-banner" style="margin-bottom: 2rem; position: relative;">
+  
+  <!-- HERO LEFT COLUMN CONTENT -->
+  <div>
+    <span class="hero-badge" style="margin-top: 0; font-size: 0.85rem;">
+      <i class="fa-solid fa-compass" style="color: #66bb6a;"></i> Empowering Karnataka Farmers & Buyers
+    </span>
+    <h1 class="hero-title" style="font-size: 2.7rem; line-height: 1.25; font-weight: 800; margin-bottom: 1rem;">
+      Smart Agriculture &<br>Direct Mandi Marketplace
+    </h1>
+    <p class="hero-subtitle" style="font-size: 1.05rem; color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin-bottom: 1.75rem;">
+      AI crop recommendations, NPK fertilizer calculator, leaf disease detection, live APMC mandi prices, and direct farm-to-doorstep produce trade.
+    </p>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <a href="{{ url_for('main.marketplace') }}" class="btn-mojara" style="padding: 0.85rem 1.8rem; font-size: 1rem; background: #2e7d32; color: #ffffff; border-radius: 50px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(46, 125, 50, 0.4);">
+        <i class="fa-solid fa-store"></i> Browse Marketplace
+      </a>
+      <a href="{{ url_for('main.ai_crop') }}" class="btn-mojara" style="padding: 0.85rem 1.8rem; font-size: 1rem; background: #ffffff; color: #1b5e20; border-radius: 50px; font-weight: 700; text-decoration: none; border: none; box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2);">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Try AI Soil Match
+      </a>
+    </div>
+  </div>
+
+  <!-- HERO RIGHT STATS CARD -->
+  <div class="hero-stats-box" style="background: rgba(10, 35, 20, 0.45); backdrop-filter: blur(16px); border: 1px solid rgba(76, 175, 80, 0.35); border-radius: 20px; padding: 1.75rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+    <div class="stat-item" style="text-align: center;">
+      <div class="stat-num" style="color: #66bb6a; font-size: 2.2rem; font-weight: 800;">5,400+</div>
+      <div class="stat-label" style="color: #ffffff; font-weight: 600; font-size: 0.85rem;">Active Farmers</div>
+    </div>
+    <div class="stat-item" style="text-align: center;">
+      <div class="stat-num" style="color: #66bb6a; font-size: 2.2rem; font-weight: 800;">100%</div>
+      <div class="stat-label" style="color: #ffffff; font-weight: 600; font-size: 0.85rem;">Direct Farm Sales</div>
+    </div>
+    <div class="stat-item" style="text-align: center;">
+      <div class="stat-num" style="color: #66bb6a; font-size: 2.2rem; font-weight: 800;">96.8%</div>
+      <div class="stat-label" style="color: #ffffff; font-weight: 600; font-size: 0.85rem;">AI Accuracy</div>
+    </div>
+    <div class="stat-item" style="text-align: center;">
+      <div class="stat-num" style="color: #66bb6a; font-size: 2.2rem; font-weight: 800;">30+</div>
+      <div class="stat-label" style="color: #ffffff; font-weight: 600; font-size: 0.85rem;">Karnataka Mandis</div>
+    </div>
+  </div>
+
+</section>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Farmer Portal Dashboard – Mojara{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 1.5rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-seedling"></i> Farmer Management Hub</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Welcome back, <strong>{{ current_user.name }}</strong> ({{ current_user.district }} District)</p>
+  </div>
+  <button onclick="document.getElementById('add-product-modal').classList.add('active')" class="btn-mojara btn-primary-mojara">
+    <i class="fa-solid fa-plus"></i> List New Agricultural Produce
+  </button>
+</div>
+
+<!-- Stats Counter Cards -->
+<div class="stats-cards-grid">
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-green"><i class="fa-solid fa-wheat-awn"></i></div>
+    <div>
+      <div class="stat-val">{{ products|length }}</div>
+      <div class="stat-desc">Listed Crops / Produce</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-blue"><i class="fa-solid fa-cart-check"></i></div>
+    <div>
+      <div class="stat-val">{{ total_orders }}</div>
+      <div class="stat-desc">Customer Orders Received</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-orange"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    <div>
+      <div class="stat-val">₹{{ total_sales }}</div>
+      <div class="stat-desc">Total Sales Revenue</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-purple"><i class="fa-solid fa-shield-halved"></i></div>
+    <div>
+      <div class="stat-val" style="font-size: 1.1rem; color: #2e7d32;">VERIFIED</div>
+      <div class="stat-desc">Officer Producer Status</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sales Analytics Chart & Active Products -->
+<div class="dashboard-layout" style="margin-bottom: 2rem;">
+  <!-- Chart -->
+  <div class="glass-card">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-chart-line"></i> Monthly Sales Earnings (₹)</h3>
+    <div class="chart-container">
+      <canvas id="farmerSalesChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Quick AI Link -->
+  <div class="glass-card" style="background: linear-gradient(135deg, rgba(27, 67, 50, 0.9) 0%, rgba(45, 106, 79, 0.9) 100%); color: #ffffff;">
+    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Agronomist for Farmers</h3>
+    <p style="font-size: 0.95rem; opacity: 0.9; margin-bottom: 1.25rem;">Check seasonal crop recommendations or run soil NPK analysis before planting your next harvest.</p>
+    <a href="{{ url_for('main.ai_crop') }}" class="btn-mojara btn-secondary-mojara" style="width: 100%;">Soil Crop Recommendation &rarr;</a>
+  </div>
+</div>
+
+<!-- Farmer Products Table -->
+<div class="glass-card" style="margin-bottom: 2rem;">
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-boxes-stacked"></i> My Active Crop Listings</h3>
+  <div class="table-responsive">
+    <table class="mojara-table">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Unit Price</th>
+          <th>Stock Quantity</th>
+          <th>Organic</th>
+          <th>Approval Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prod in products %}
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <img src="{{ prod.image_url }}" alt="" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+                <div>
+                  <strong>{{ prod.title }}</strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">{{ prod.district }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ prod.category.name if prod.category else 'Crop' }}</td>
+            <td><strong>₹{{ prod.price }}</strong> / {{ prod.unit }}</td>
+            <td>{{ prod.stock_quantity }} {{ prod.unit }}s</td>
+            <td>
+              {% if prod.is_organic %}
+                <span style="background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.5rem; border-radius: 50px; font-weight: 700; font-size: 0.75rem;">Organic</span>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 0.75rem;">Standard</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 700; font-size: 0.75rem;">Approved</span>
+            </td>
+            <td>
+              <a href="{{ url_for('main.product_detail', product_id=prod.id) }}" class="btn-mojara btn-secondary-mojara" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">View</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted);">No products listed yet. Click "List New Agricultural Produce" to start selling.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal for Adding New Product -->
+<div id="add-product-modal" class="mojara-modal">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-dark);"><i class="fa-solid fa-plus-circle"></i> List New Agricultural Produce</h3>
+      <button onclick="document.getElementById('add-product-modal').classList.remove('active')" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
+    </div>
+
+    <form method="POST" action="{{ url_for('dashboard.farmer_add_product') }}">
+      <div class="form-group">
+        <label class="form-label">Produce Title (English)</label>
+        <input type="text" name="title" required placeholder="e.g., Organic Mandya Finger Millet" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Produce Title (Kannada)</label>
+        <input type="text" name="title_kn" placeholder="ಉದಾ: ಸಾವಯವ ಮಂಡ್ಯ ರಾಗಿ" class="form-control">
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category_id" class="form-control">
+            {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Selling Unit</label>
+          <select name="unit" class="form-control">
+            <option value="kg">Per Kilogram (kg)</option>
+            <option value="ton">Per Ton</option>
+            <option value="quintal">Per Quintal (100kg)</option>
+            <option value="bag">Per Bag (50kg)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Price per Unit (₹)</label>
+          <input type="number" step="0.5" name="price" required placeholder="65.0" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Quantity Available</label>
+          <input type="number" name="stock_quantity" value="100" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea name="description" rows="3" placeholder="Harvesting details, variety info..." class="form-control"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Product Image URL</label>
+        <input type="text" name="image_url" placeholder="https://..." class="form-control">
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+        <input type="checkbox" id="is_organic" name="is_organic" style="width: 18px; height: 18px;">
+        <label for="is_organic" style="font-weight: 600; cursor: pointer;">This crop is 100% Organically Farmed</label>
+      </div>
+
+      <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; margin-top: 0.5rem;">
+        Publish Produce to Marketplace &rarr;
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Farmer Community Forum & Q&A – Mojara{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-comments"></i> Farmer Community Forum & Officer Q&A</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Ask farming questions, share experiences, and receive verified answers from agricultural department officers.</p>
+  </div>
+</div>
+
+<div class="dashboard-layout">
+  <!-- Ask Question Form -->
+  <aside class="dashboard-sidebar">
+    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary-dark);"><i class="fa-solid fa-pen-to-square"></i> Ask a Question</h3>
+    
+    {% if current_user.is_authenticated %}
+      <form method="POST" action="{{ url_for('main.forum') }}">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control">
+            <option value="Pest Control">Pest Control & Diseases</option>
+            <option value="Crop Selection">Crop Selection & Soil</option>
+            <option value="Fertilizer">Fertilizer & Irrigation</option>
+            <option value="Market Rates">Market Rates & Commerce</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Question Title</label>
+          <input type="text" name="title" placeholder="e.g., How to handle organic pest control in tomato?" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Details</label>
+          <textarea name="content" rows="4" placeholder="Describe symptoms, soil, crop variety..." required class="form-control"></textarea>
+        </div>
+
+        <button type="submit" class="btn-mojara btn-primary-mojara" style="width: 100%;">
+          <i class="fa-solid fa-paper-plane"></i> Post Question
+        </button>
+      </form>
+    {% else %}
+      <div style="text-align: center; padding: 1.5rem; background: rgba(0,0,0,0.03); border-radius: var(--radius-sm);">
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Please sign in to post questions and interact with agricultural officers.</p>
+        <a href="{{ url_for('auth.login') }}" class="btn-mojara btn-primary-mojara" style="width: 100%;">Sign In &rarr;</a>
+      </div>
+    {% endif %}
+  </aside>
+
+  <!-- Posts List -->
+  <main>
+    {% for post in posts %}
+      <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="background: rgba(45, 106, 79, 0.1); color: var(--primary); font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 50px;">
+            {{ post.category }}
+          </span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Asked by {{ post.author.name if post.author else 'Farmer' }} | {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">{{ post.title }}</h3>
+        <p style="font-size: 0.93rem; color: var(--text-main); line-height: 1.6; margin-bottom: 1.25rem;">
+          {{ post.content }}
+        </p>
+
+        <!-- Answers Section -->
+        <div style="background: rgba(0,0,0,0.03); border-radius: var(--radius-sm); padding: 1rem; margin-top: 1rem;">
+          <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary-dark);">
+            <i class="fa-solid fa-comments"></i> Replies & Officer Advisories ({{ post.comments|length }}):
+          </div>
+
+          {% for comment in post.comments %}
+            <div style="background: #ffffff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                <strong style="font-size: 0.9rem;">
+                  {{ comment.user.name if comment.user else 'Officer' }}
+                  {% if comment.is_officer_verified %}
+                    <span style="background: #e3f2fd; color: #1565c0; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 50px; margin-left: 0.4rem;">
+                      <i class="fa-solid fa-circle-check"></i> Verified Officer Advisory
+                    </span>
+                  {% endif %}
+                </strong>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">{{ comment.created_at.strftime('%Y-%m-%d') }}</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-main);">{{ comment.comment }}</p>
+            </div>
+          {% else %}
+            <p style="font-size: 0.85rem; color: var(--text-muted);">No replies yet. Be the first to answer!</p>
+          {% endfor %}
+
+          {% if current_user.is_authenticated %}
+            <form method="POST" action="{{ url_for('main.add_forum_comment', post_id=post.id) }}" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+              <input type="text" name="comment" placeholder="Write a reply or officer advisory..." required class="form-control" style="font-size: 0.85rem; padding: 0.45rem 0.75rem;">
+              <button type="submit" class="btn-mojara btn-primary-mojara" style="padding: 0.45rem 0.85rem; font-size: 0.85rem; white-space: nowrap;">Reply</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="text-align: center; padding: 3rem;">
+        <i class="fa-solid fa-comments" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <h3>No community questions yet.</h3>
+        <p style="color: var(--text-muted);">Be the first farmer to post a question on the forum!</p>
+      </div>
+    {% endfor %}
+  </main>
+</div>
+{% endblock %}

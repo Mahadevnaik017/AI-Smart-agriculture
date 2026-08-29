@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Agriculture News & Market Bulletin – Smart Agriculture{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 2rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-newspaper" style="color: var(--primary);"></i> Agriculture News & Market Bulletins</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Stay updated with Karnataka agricultural policy decisions, APMC price surges, weather warnings, and government subsidy announcements.</p>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+  {% for item in news_items %}
+    <div class="glass-card" style="display: grid; grid-template-columns: auto 1fr; gap: 1.5rem; align-items: center; border-left: 5px solid var(--primary);">
+      <div style="width: 64px; height: 64px; background: rgba(45, 106, 79, 0.12); color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+        <i class="fa-solid {{ item.icon }}"></i>
+      </div>
+      <div>
+        <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap;">
+          <span style="background: var(--primary); color: #ffffff; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 50px;">
+            {{ item.category }}
+          </span>
+          <span style="font-size: 0.82rem; color: var(--text-muted);"><i class="fa-regular fa-calendar"></i> {{ item.date }}</span>
+          <span style="font-size: 0.82rem; color: var(--text-muted);"><i class="fa-solid fa-building-flag"></i> {{ item.source }}</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">{{ item.title }}</h3>
+        <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.5;">{{ item.summary }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

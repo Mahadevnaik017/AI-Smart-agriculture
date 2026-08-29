@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Buyer Orders & Tracking – Mojara{% endblock %}
+
+{% block content %}
+<div class="section-header" style="margin-bottom: 1.5rem;">
+  <div>
+    <h1 class="section-title"><i class="fa-solid fa-cart-shopping"></i> Buyer Account & Orders</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Track order delivery status, manage shopping cart, and download tax invoices.</p>
+  </div>
+  {% if cart_items %}
+    <button onclick="openCheckoutModal()" class="btn-mojara btn-primary-mojara">
+      <i class="fa-solid fa-credit-card"></i> Proceed to Checkout ({{ cart_items|length }} Items)
+    </button>
+  {% endif %}
+</div>
+
+<!-- Stats Counter Cards -->
+<div class="stats-cards-grid">
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-blue"><i class="fa-solid fa-box-archive"></i></div>
+    <div>
+      <div class="stat-val">{{ orders|length }}</div>
+      <div class="stat-desc">Total Orders Placed</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+    <div>
+      <div class="stat-val">₹{{ total_spent }}</div>
+      <div class="stat-desc">Total Purchase Spent</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon-wrapper icon-orange"><i class="fa-solid fa-heart"></i></div>
+    <div>
+      <div class="stat-val">{{ wishlist_items|length }}</div>
+      <div class="stat-desc">Saved Wishlist Produce</div>
+    </div>
+  </div>
+</div>
+
+<!-- Shopping Cart Section if items present -->
+{% if cart_items %}
+  <div class="glass-card" style="margin-bottom: 2rem; border-left: 4px solid var(--primary);">
+    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-cart-flatbed"></i> Current Shopping Cart</h3>
+    <div class="table-responsive">
+      <table class="mojara-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Farmer</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set cart_total = namespace(value=0) %}
+          {% for item in cart_items %}
+            {% set sub = item.product.final_price * item.quantity %}
+            {% set cart_total.value = cart_total.value + sub %}
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <img src="{{ item.product.image_url }}" alt="" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+                  <div>
+                    <strong>{{ item.product.title }}</strong>
+                    {% if item.product.discount_percent and item.product.discount_percent > 0 %}
+                      <span style="color: #2e7d32; font-size: 0.75rem; font-weight: 700;">({{ item.product.discount_percent }}% OFF)</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td>{{ item.product.farmer.name if item.product.farmer else 'Mandya Farmer' }}</td>
+              <td>₹{{ item.product.final_price }} / {{ item.product.unit }}</td>
+              <td>
+                <input type="number" value="{{ item.quantity }}" min="1" onchange="updateCartQty({{ item.id }}, this.value)" style="width: 60px; padding: 0.3rem; border: 1px solid var(--card-border); border-radius: 4px;">
+              </td>
+              <td><strong>₹{{ sub }}</strong></td>
+              <td>
+                <button onclick="removeCartItem({{ item.id }})" style="background: none; border: none; color: #c62828; cursor: pointer;"><i class="fa-solid fa-trash-can"></i> Remove</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+      <span style="font-size: 1.2rem; font-weight: 800; color: var(--primary-dark);">Total Price: ₹<span id="cart-total-amount">{{ cart_total.value }}</span></span>
+      <button onclick="openCheckoutModal()" class="btn-mojara btn-primary-mojara">
+        Proceed to Multi-Stage Checkout &rarr;
+      </button>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Order History & Invoices -->
+<div class="glass-card" style="margin-bottom: 2rem;">
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;"><i class="fa-solid fa-receipt"></i> Order History, Tracking & Invoices</h3>
+  <div class="table-responsive">
+    <table class="mojara-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Order Date</th>
+          <th>Total Amount</th>
+          <th>Payment Method</th>
+          <th>Payment Status</th>
+          <th>Order Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td><strong>#MOJ-{{ order.id }}</strong></td>
+            <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td><strong style="color: var(--primary);">₹{{ order.total_amount }}</strong></td>
+            <td>
+              {% if order.payment_method == 'UPI' %}
+                <span style="color: #1565c0; font-weight: 700;"><i class="fa-solid fa-qrcode"></i> UPI ({{ order.upi_utr or 'Verified' }})</span>
+              {% else %}
+                <span style="color: #e65100; font-weight: 700;"><i class="fa-solid fa-hand-holding-dollar"></i> Cash on Delivery</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 700; font-size: 0.75rem;">
+                {{ order.payment_status }}
+              </span>
+            </td>
+            <td>
+              <span style="background: #e3f2fd; color: #1565c0; padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 700; font-size: 0.75rem;">
+                <i class="fa-solid fa-truck-fast"></i> {{ order.order_status }}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.3rem;">
+                <a href="{{ url_for('main.order_tracking', order_id=order.id) }}" class="btn-mojara btn-primary-mojara" style="padding: 0.3rem 0.65rem; font-size: 0.78rem;" title="Track Delivery Timeline">
+                  <i class="fa-solid fa-location-crosshairs"></i> Track
+                </a>
+                <button onclick="downloadInvoicePDF({{ order.id }})" class="btn-mojara btn-secondary-mojara" style="padding: 0.3rem 0.65rem; font-size: 0.78rem;" title="Download PDF Proof">
+                  <i class="fa-solid fa-file-pdf" style="color: #c62828;"></i> PDF
+                </button>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted);">No orders placed yet. Browse the Marketplace to place your first farm-direct order!</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MULTI-STAGE CHECKOUT MODAL -->
+<div id="checkout-modal" class="mojara-modal">
+  <div class="modal-content" style="max-width: 640px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-dark);"><i class="fa-solid fa-shield-halved"></i> Multi-Stage Checkout & Payment</h3>
+      <button onclick="closeCheckoutModal()" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
+    </div>
+
+    <!-- STAGE 1: Basic Information -->
+    <div id="checkout-stage-1">
+      <div style="background: rgba(45, 106, 79, 0.08); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-weight: 700; color: var(--primary-dark);">
+        Stage 1 of 2: Basic Contact & Delivery Location
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="checkout_name" value="{{ current_user.name }}" required class="form-control">
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="checkout_email" value="{{ current_user.email }}" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Phone</label>
+          <input type="tel" id="checkout_phone" value="{{ current_user.phone or '+91 9845012345' }}" required class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Delivery Address & Pincode</label>
+        <textarea id="checkout_address" required rows="3" class="form-control">{{ current_user.address or 'Flat 402, Green Acres Apt, Indiranagar, Bengaluru - 560038' }}</textarea>
+      </div>
+
+      <button onclick="goToCheckoutStage2()" type="button" class="btn-mojara btn-primary-mojara" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+        Next: Select Payment Method &rarr;
+      </button>
+    </div>
+
+    <!-- STAGE 2: Payment Selection (UPI QR Code vs COD) -->
+    <div id="checkout-stage-2" style="display: none;">
+      <div style="background: rgba(45, 106, 79, 0.08); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-weight: 700; color: var(--primary-dark);">
+        Stage 2 of 2: Payment Option
+      </div>
+
+      <form onsubmit="submitCheckoutOrder(event)">
+        <div class="form-group">
+          <label class="form-label">Select Payment Method</label>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+            <label style="background: rgba(255,255,255,0.9); padding: 0.85rem; border-radius: var(--radius-sm); border: 2px solid var(--primary); cursor: pointer; text-align: center; font-weight: 700;">
+              <input type="radio" name="payment_method_radio" value="UPI" checked onclick="handlePaymentMethodChange('UPI')">
+              <i class="fa-solid fa-qrcode" style="color: #1565c0;"></i> UPI Transaction QR
+            </label>
+            <label style="background: rgba(255,255,255,0.9); padding: 0.85rem; border-radius: var(--radius-sm); border: 2px solid var(--card-border); cursor: pointer; text-align: center; font-weight: 700;">
+              <input type="radio" name="payment_method_radio" value="COD" onclick="handlePaymentMethodChange('COD')">
+              <i class="fa-solid fa-hand-holding-dollar" style="color: #e65100;"></i> Cash on Delivery
+            </label>
+          </div>
+        </div>
+
+        <!-- UPI Valid Payment QR Code Container -->
+        {% set cart_total_val = cart_items|sum(attribute='product.price') if cart_items else 0 %}
+        <div id="upi-qr-container" style="text-align: center; background: #ffffff; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--card-border); margin-bottom: 1.25rem;">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Scan QR Code to Pay Total Amount Automatically</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--primary-dark); margin: 0.3rem 0 0.75rem 0;">
+            Exact Total Amount: ₹<span id="qr-total-amount">{{ cart_total_val }}</span>
+          </div>
+
+          <!-- Authentic Google Pay QR Code Image (Kiran Andani) -->
+          <div style="position: relative; display: inline-block; padding: 8px; background: #ffffff; border-radius: 12px; border: 2px solid #e0e0e0;">
+            <img src="{{ url_for('static', filename='images/gpay_qr.jpg') }}" alt="Google Pay QR Code - Kiran Andani" style="width: 220px; height: auto; border-radius: 8px; object-fit: contain;">
+          </div>
+          
+          <div style="font-size: 0.82rem; color: #2e7d32; font-weight: 700; margin-top: 0.5rem;">
+            <i class="fa-solid fa-shield-halved"></i> Google Pay Verified Payee: <strong>Kiran Andani</strong> (<code>kiranandani2005@okicici</code>)
+          </div>
+        </div>
+
+        <!-- COD Container -->
+        <div id="cod-info-container" style="display: none; background: rgba(230, 81, 0, 0.08); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid rgba(230, 81, 0, 0.2); margin-bottom: 1.25rem; text-align: center;">
+          <i class="fa-solid fa-hand-holding-dollar" style="font-size: 2rem; color: #e65100; margin-bottom: 0.5rem;"></i>
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: #e65100;">Cash on Delivery (COD) Selected</h4>
+          <p style="font-size: 0.88rem; color: var(--text-muted);">
+            You will pay exact cash amount of <strong>₹{{ cart_total_val }}</strong> directly to the delivery person upon arrival at your doorstep.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button type="button" onclick="backToCheckoutStage1()" class="btn-mojara btn-secondary-mojara" style="flex: 1;">&larr; Back to Details</button>
+          <button type="submit" class="btn-mojara btn-primary-mojara" style="flex: 2;">
+            <i class="fa-solid fa-lock"></i> Verify Payment & Place Order &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

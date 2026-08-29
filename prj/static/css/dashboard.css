@@ -1,0 +1,173 @@
+/* Dashboard Specific Styles */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2rem;
+  min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 992px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-sidebar {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem 1rem;
+  height: fit-content;
+}
+
+.user-profile-summary {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.avatar-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-green) 100%);
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.3);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.4rem;
+}
+
+.role-farmer { background: #e8f5e9; color: #2e7d32; }
+.role-buyer { background: #e3f2fd; color: #1565c0; }
+.role-officer { background: #fff3e0; color: #e65100; }
+.role-admin { background: #f3e5f5; color: #7b1fa2; }
+
+.sidebar-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* Stat Counters Grid */
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #ffffff;
+}
+
+.icon-green { background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%); }
+.icon-blue { background: linear-gradient(135deg, #1565c0 0%, #2196f3 100%); }
+.icon-orange { background: linear-gradient(135deg, #e65100 0%, #ff9800 100%); }
+.icon-purple { background: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%); }
+
+.stat-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.stat-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Tables */
+.table-responsive {
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+}
+
+.mojara-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.mojara-table th {
+  background: rgba(45, 106, 79, 0.08);
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  font-size: 0.9rem;
+}
+
+body.dark-mode .mojara-table th {
+  background: rgba(82, 183, 136, 0.15);
+  color: var(--accent-green);
+}
+
+.mojara-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 0.9rem;
+}
+
+/* Chart Canvas Container */
+.chart-container {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .ai-crop-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
