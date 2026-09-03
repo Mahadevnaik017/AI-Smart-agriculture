@@ -1,3 +1,11 @@
+"""
+========================================================================================
+AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+Module: User Dashboard View Controllers (routes/dashboard.py)
+Assigned Specialist: Mallikarjun Vaddarganvi
+Milestone: Web application structure and dashboard organization (3 August 2026)
+========================================================================================
+"""
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from models import db, User, Product, Category, Order, OrderItem, Wishlist, CartItem, Review, Complaint, Announcement, GovtScheme, MarketPrice, ReturnRequest, AgriQuote
