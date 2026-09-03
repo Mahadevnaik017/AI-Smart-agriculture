@@ -1,3 +1,9 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Module: Database Initialization & Seeding Utility (init_db.py)
+# Assigned Engineer: Kiran Muttappa Andani
+# Milestone: Automated table creation and relational constraint setup (12 August 2026)
+# ========================================================================================
 from app import create_app
 from models import db, User, Category, Product, MarketPrice, GovtScheme, Announcement, ForumPost, ForumComment, Order, OrderItem, Review, Complaint, Advertisement, AgriQuote
 from datetime import datetime, timedelta

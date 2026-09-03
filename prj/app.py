@@ -1,3 +1,14 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Module: Application Factory & Core Server Architecture (app.py)
+# Assigned Engineer: Kiran Muttappa Andani
+# Responsibility: Backend, MySQL Database, Weather API & System Integration
+# Milestone: Backend architecture and API integration planning (20 July 2026)
+# ========================================================================================
+# Backend Technical Requirements:
+# Supports authentication, crop advisory, mandi data, and external weather services.
+# Module Coordination:
+# Central blueprint registration coordinating routes: auth, main, dashboard, api.
 import os
 from flask import Flask, render_template, request, session
 from flask_login import LoginManager, current_user

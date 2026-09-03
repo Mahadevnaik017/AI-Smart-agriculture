@@ -1,3 +1,23 @@
+# ========================================================================================
+# AI-Driven Smart Agriculture & Micro-crop Advisory System (Mojara)
+# Module: Relational Database Models & SQLAlchemy Schema (models.py)
+# Assigned Engineer: Kiran Muttappa Andani
+# Milestone: Data storage requirements review for agriculture platform (25 July 2026)
+# ========================================================================================
+# Relational Database Architecture:
+# Supports Users, Products, Orders, MarketPrices, Announcements, and AI Logs.
+# Entity Categorization:
+# Core tables: users, categories, products, orders, order_items, market_prices, forum_posts.
+# Data Flow Coordination:
+# Structured flow between user session, catalog queries, and transactional orders.
+# Database Schema Review:
+# Ensures compatibility for weather caches and disease diagnosis logs.
+# Relational Database Schema Design:
+# User identity model with role-based access control (farmer, buyer, officer, admin).
+# Password encryption using Werkzeug security (pbkdf2:sha256).
+# Preprocessing & Storage Verification:
+# Storage paths, foreign keys, and cascading rules verified across all relational models.
+# Backend & database milestone sign-off by Kiran Muttappa Andani.
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
